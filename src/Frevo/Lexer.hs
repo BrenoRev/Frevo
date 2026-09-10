@@ -1,0 +1,1 @@
+space consumer, lexeme, símbolos, reservadas
