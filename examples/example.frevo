@@ -1,0 +1,72 @@
+# ========================================================
+# Exemplo de Código na Linguagem Cordel
+# Tipagem Estática e Palavras-chave Regionais
+# ========================================================
+
+# Função simples com condicional (se então / sinão)
+função eMaiorDeIdade(Numero idade) -> Certeza faça
+    se idade >= 18 então
+        devolve Certo
+    sinão
+        devolve Errado
+    cabousse
+cabousse
+
+# Função para calcular a média de valores
+função calcularMedia(Quebrado total, Numero quantidade) -> Quebrado
+    se quantidade <= 0 então
+        devolve 0.0
+    cabousse
+
+    Quebrado media = total / quantidade
+    devolve media
+cabousse
+
+
+# Procedimento com laço enquanto (while), break (poparrar) e continue (segue)
+função processarContagem(Numero limite) -> Nadica 
+    Numero contador = 0
+
+    enquanto contador < limite faça
+        contador = contador + 1
+
+        # Pula a contagem no valor 3
+        se contador == 3 então
+            segue
+        cabousse
+
+        # Interrompe o laço caso atinja 10
+        se contador >= 10 então
+            poparrar
+        cabousse
+    cabousse
+    
+cabousse
+
+# Função principal demonstrando tipos e operadores
+função principal() -> Numero
+    # Declarações com tipagem estática
+    Numero idade = 25
+    Quebrado altura = 1.75
+    Certeza eTrabalhador = Certo
+    Prosa saudacao = "Salve, Maria Bonita e Lamparina!"
+
+    # Coleções e tipos opcionais
+    Ruma de Numero valores = [10, 20, 30, 40]
+    Numero resultadoBusca = buscarPrimeiroPositivo(valores)
+
+    # Operadores lógicos: e, ou, não
+    se eTrabalhador e não (idade < 18) então
+        Quebrado resultado = calcularMedia(150.0, 4)
+    sinão
+        Prosa aviso = "Condicao nao atendida"
+    cabousse
+
+    # Percorrendo itens com pracada _ em _ faça
+    Quebrado somaTotal = 0.0
+    pracada item em valores faça
+        somaTotal = somaTotal + item
+    cabousse
+
+    devolve 0
+cabousse
