@@ -1,1 +1,0 @@
-Expressões, tabela de precedência
