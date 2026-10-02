@@ -1,5 +1,6 @@
 module Main where
 
+import qualified Data.Text as T
 import qualified Data.Text.IO.Utf8 as T
 import Frevo.Parser (parseProgram)
 import System.Environment (getArgs)
@@ -14,7 +15,8 @@ main = do
   args <- getArgs
   case args of
     [path] -> do
-      source <- T.readFile path
+      -- O Bloco de Notas do Windows grava um BOM no começo do arquivo.
+      source <- T.dropWhile (== '\xFEFF') <$> T.readFile path
       case parseProgram path source of
         Right ast -> mapM_ print ast
         Left err -> do
