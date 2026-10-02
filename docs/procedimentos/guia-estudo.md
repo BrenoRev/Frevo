@@ -1,6 +1,6 @@
 # Guia de estudo das entregas
 
-Escreve `docs/guia-de-estudo.md` e gera `docs/guia-de-estudo.pdf` (ambos fora do git). O leitor é um integrante do grupo que vai ser arguido individualmente e precisa entender o que foi construído, inclusive as partes que não escreveu.
+Escreve `docs/guia-de-estudo.md` e gera `docs/guia-de-estudo.pdf` (arquivos gerados, que não se commitam). O leitor é um integrante do grupo que vai ser arguido individualmente e precisa entender o que foi construído, inclusive as partes que não escreveu.
 
 Procedimento para qualquer pessoa ou assistente de IA. Se pedirem uma entrega específica, atualize só a seção dela e mantenha as outras; senão, cubra todas as entregas concluídas.
 
@@ -52,4 +52,4 @@ Precisa de `pandoc` e `weasyprint` (`brew install pandoc weasyprint`). Abra o PD
 - Vocabulário e precedência batem com `reservedKeywords` e `operatorTable`.
 - O guia não menciona nada que foi cortado da linguagem como se existisse.
 
-O guia é material gerado: os dois arquivos estão no `.gitignore` e não entram em commit nem em PR. Cada integrante gera o seu.
+O guia é material gerado: os dois arquivos não entram em commit nem em PR. Eles não estão no `.gitignore`, então confira o `git status` antes de commitar e apague-os depois de usar.

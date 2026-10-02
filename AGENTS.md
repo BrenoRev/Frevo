@@ -83,7 +83,7 @@ Gramática: [docs/gramatica.ebnf](docs/gramatica.ebnf). Decisões e cortes: [doc
 | [docs/](docs/) | Gramática, especificação e o PDF do levantamento de vocabulário |
 | [docs/regras/](docs/regras/) | Padrões de código, linguagem, testes, git e a definição de pronto — **seguir sempre** |
 | [scripts/verificar.sh](scripts/verificar.sh) | Tudo o que o CI roda, em um comando |
-| [docs/procedimentos/](docs/procedimentos/) | Passo a passo para revisar um PR e para gerar o guia de estudo (PDF, fora do git) |
+| [docs/procedimentos/](docs/procedimentos/) | Passo a passo para revisar um PR e para gerar o guia de estudo (PDF gerado, que não se commita) |
 | [.claude/](.claude/), [CLAUDE.md](CLAUDE.md) | Atalhos do Claude Code para os arquivos acima; não têm conteúdo próprio |
 | [.github/workflows/ci.yml](.github/workflows/ci.yml) | CI do PR: build com `-Werror`, testes, exemplos, hlint, padrão de commits |
 

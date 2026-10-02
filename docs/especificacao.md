@@ -60,7 +60,7 @@ Entra no núcleo o que precisa de sintaxe própria ou muda o fluxo de execução
 
 ## O que ficou de fora
 
-O levantamento de vocabulário está em [lexicolinguagempernambucana.pdf](lexicolinguagempernambucana.pdf). Em relação a ele:
+O levantamento de vocabulário está em [lexico-linguagem-pernambucana.pdf](lexico-linguagem-pernambucana.pdf). Em relação a ele:
 
 | Cortado | Motivo |
 |---|---|
