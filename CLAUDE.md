@@ -9,7 +9,7 @@ A avaliação de cada entrega é **oral e individual**. Código que roda não ga
 | Campo | Valor |
 |---|---|
 | Nome / extensão | Frevo / `.frevo` |
-| Host | Haskell (Cabal, `base ^>=4.18` → GHC 9.6.x) |
+| Host | Haskell (Cabal, GHC 9.6 ou mais novo; o CI usa 9.10.3) |
 | Estratégia de parsing | Parser combinators (Megaparsec + `parser-combinators`) |
 | Propósito | Específico (DSL): ensino de programação para crianças, com vocabulário pernambucano |
 | Paradigma | Imperativo |
@@ -18,18 +18,22 @@ A avaliação de cada entrega é **oral e individual**. Código que roda não ga
 | Representação intermediária | TAC |
 | Repositório | https://github.com/BrenoRev/Frevo |
 
-**Vocabulário atual** (fonte: `reservedKeywords` em [src/Frevo/Parser.hs](src/Frevo/Parser.hs)):
+**Vocabulário** (24 palavras reservadas, em `reservedKeywords` de [src/Frevo/Lexer.hs](src/Frevo/Lexer.hs)):
 
 | Função | Lexema |
 |---|---|
-| Tipos | `Numero` (int), `Quebrado` (real), `Prosa` (string), `Certeza` (bool), `Ruma de T` (lista), `Nadica` (unit) |
+| Tipos | `Numero` (int), `Quebrado` (real), `Prosa` (string), `Certeza` (bool), `Ruma de T` (lista), `Nadica` (sem valor, só como retorno) |
 | Literais booleanos | `Certo`, `Errado` |
+| Declaração | `Numero x = 0` — sempre com tipo; `x = 1` é só atribuição |
 | Condicional | `se … então … sinão … cabousse` |
-| Laços | `enquanto … faça … cabousse`, `pracada x em e faça … cabousse` |
-| Controle | `poparrar` (break), `segue` (continue), `devolve` (return) |
-| Função | `função nome(T x, …) -> T … cabousse` |
-| Lógicos | `e`, `ou`, `nam` (negação) |
+| Laços | `enquanto … faça … cabousse`, `pracada x em xs faça … cabousse` |
+| Controle | `poparrar` (break), `segue` (continue), `devolve e` (return) |
+| Função | `função nome(T x, …) -> T … cabousse`, só no nível de topo |
+| Operadores | `+ - * /`, `== <= >= < >`, `e`, `ou`, `nam` |
+| Stdlib | `espia`, `pergunta`, `encanga`, `quantoTem` — funções comuns, não reservadas |
 | Comentário | `#` até o fim da linha |
+
+Gramática: [docs/gramatica.ebnf](docs/gramatica.ebnf). Decisões e cortes: [docs/especificacao.md](docs/especificacao.md).
 
 **Equipe (4 integrantes):**
 
@@ -46,7 +50,7 @@ A avaliação de cada entrega é **oral e individual**. Código que roda não ga
 2. **Nunca inventar dados.** Sem certeza sobre uma API, citação, regra da disciplina ou decisão do grupo: dizer que não sabe em vez de preencher com algo plausível. Lacuna é melhor que informação errada.
 3. **Explicar antes de implementar.** Antes de cada bloco de código relevante, 3–6 linhas: qual algoritmo, por que ele, quais alternativas foram descartadas.
 4. **Sabatina ao final.** Toda implementação significativa termina com 3 perguntas no estilo do professor ("por que X e não Y?", "o que acontece se a entrada for Z?", "qual o trade-off?").
-5. **Checklist antes de declarar pronto.** Passar item a item pela checklist da entrega (§5), marcando `[x]`/`[ ]` explicitamente.
+5. **Checklist antes de declarar pronto.** Rodar build, testes e hlint antes. Passar item a item pela checklist da entrega (§5), marcando `[x]`/`[ ]` explicitamente.
 6. **Não simplificar o problema para caber.** Nada de regex no lugar de parser, `eval` do host no lugar de interpretador, ou hardcode para passar em teste. Se algo for inviável, dizer e propor um recorte honesto — nunca um stub disfarçado.
 7. **Testes fazem parte da entrega.** Casos válidos, inválidos (rejeição) e de borda. Parser sem teste de rejeição não está pronto.
 8. **Idioma.** Respostas em português do Brasil. Identificadores Haskell em inglês. As palavras-chave e as mensagens de erro **da linguagem Frevo** são em português regional — isso é o propósito da linguagem, não uma violação da regra.
@@ -55,55 +59,39 @@ A avaliação de cada entrega é **oral e individual**. Código que roda não ga
 
 ## 3. Mapa do repositório
 
-| Caminho | Conteúdo | Situação |
-|---|---|---|
-| [Frevo.cabal](Frevo.cabal) | Pacote; só o `executable Frevo` | Sem `library` e sem `test-suite`; referencia `LICENSE` e `CHANGELOG.md` inexistentes |
-| [app/Main.hs](app/Main.hs) | CLI: lê arquivo, imprime AST ou erro | Funcional em estrutura |
-| [src/Frevo/AST.hs](src/Frevo/AST.hs) | `Type`, `Op`, `Expr`, `Stmt` | Incompleta (§4) |
-| [src/Frevo/Parser.hs](src/Frevo/Parser.hs) | Camada léxica + parser Megaparsec | Parcial; **erro de tipo em `pFor`** (§4) |
-| [src/Frevo/Lexer.hs](src/Frevo/Lexer.hs) | Lexer manual (`String -> [Token]`) | Não usado pelo parser nem listado no Cabal (§4) |
-| [src/Frevo/Syntax.hs](src/Frevo/Syntax.hs), [src/Frevo/Pretty.hs](src/Frevo/Pretty.hs) | — | Placeholders de uma linha, não são Haskell válido |
-| [test/](test/) | `Spec.hs` + `Frevo/{Lexer,Expr,Stmt,Erro,RoundTrip}Spec.hs` | **Todos vazios (0 bytes)** |
-| [examples/example.frevo](examples/example.frevo) | Exemplo completo com funções e tipos | Não é aceito pelo parser atual |
-| [exemplo.frevo](exemplo.frevo) | Exemplo simples, na raiz | Deveria estar em `examples/` |
-| `docs/` | Gramática, regras de tipagem, semântica | `gramatica.ebnf` está **vazio** |
-| [README.md](README.md) | Registro de processo das entregas | Falta build/execução/teste e tabela de decisões |
-
-**Comandos** (ainda não documentados no README; o `cabal test` só existirá após criar a stanza `test-suite`):
+| Caminho | Conteúdo |
+|---|---|
+| [Frevo.cabal](Frevo.cabal) | `library` (src), `executable Frevo` (app), `test-suite spec` (test) |
+| [src/Frevo/AST.hs](src/Frevo/AST.hs) | `Type`, `Op`, `Expr`, `Stmt`; o programa é `[Stmt]` |
+| [src/Frevo/Lexer.hs](src/Frevo/Lexer.hs) | Camada léxica em Megaparsec: `sc`, `lexeme`, `symbol`, `rword`, `pIdentifier`, `reservedKeywords` |
+| [src/Frevo/Parser.hs](src/Frevo/Parser.hs) | Expressões (`makeExprParser` + `operatorTable`), comandos, `pFun`, `parseProgram` |
+| [app/Main.hs](app/Main.hs) | CLI: imprime a AST, ou o erro com linha e coluna e código de saída 1 |
+| [test/](test/) | hspec: `LexerSpec`, `ExprSpec`, `StmtSpec`, `ErroSpec` |
+| [examples/](examples/) | `01_bom_dia`, `02_passos`, `03_feira` — juntos usam toda a linguagem |
+| [docs/](docs/) | Gramática, especificação e o PDF do levantamento de vocabulário |
+| [.claude/rules/](.claude/rules/) | Padrões de código, linguagem, testes e git — **seguir sempre** |
+| [.claude/skills/revisar-pr/](.claude/skills/revisar-pr/SKILL.md) | `/revisar-pr <n>`: revisão de PR antes do merge |
+| [.github/workflows/ci.yml](.github/workflows/ci.yml) | CI do PR: build com `-Werror`, testes, exemplos, hlint, padrão de commits |
 
 ```sh
-cabal build
-cabal run Frevo -- examples/example.frevo
+cabal build all --ghc-options=-Werror
 cabal test
+cabal run Frevo -- examples/03_feira.frevo
+hlint src app test
 ```
 
 ## 4. Estado atual e por onde seguir
 
-Levantado por leitura do código, **sem compilar** (GHC/Cabal não estavam instalados na máquina onde este arquivo foi escrito). Antes de qualquer trabalho, rodar `cabal build` e corrigir esta seção se ela estiver desatualizada.
+**Entregas 1 e 2 implementadas** na branch `feat/entrega-2`: gramática, parser e suíte de testes prontos, build e testes verdes.
 
-**Entrega corrente: Entrega 2 (gramática + parser + testes).** A Entrega 3 depende dela e só começa quando a checklist da E2 fechar.
+Falta, fora do código: slides da Entrega 1 e a preparação de cada integrante para a arguição (todos precisam saber explicar `Lexer.hs`, `Parser.hs` e a gramática).
 
-### Pendências verificadas no código
+**Próxima: Entrega 3 (sistema de tipos e interpretador).** Pontos de partida já conhecidos:
 
-1. `pFor` constrói `SFor var body`, mas o construtor é `SFor String Expr [Stmt]` — o módulo não deve compilar; `iterable` está sem uso.
-2. `em` não está em `reservedKeywords`, embora seja palavra-chave do `pracada`.
-3. Parser não cobre: definição de função, declaração tipada, chamada de função, literal de lista, indexação, operadores unários (negação lógica e menos unário), `poparrar`, `segue`. A AST também não tem esses construtores.
-4. `TArray` não carrega o tipo do elemento (`Ruma de Numero`).
-5. A AST não guarda posição de origem — necessária para os erros de tipo com linha/coluna da Entrega 3.
-6. `Lexer.hs` declara `module Lexer` em `src/Frevo/Lexer.hs` (nome não bate com o caminho) e tem `main` próprio.
-7. Erros sintáticos saem pelo `errorBundlePretty` padrão; falta a camada com o banco de mensagens da Entrega 1.
-8. `examples/example.frevo` diz "Linguagem Cordel" no cabeçalho e chama `buscarPrimeiroPositivo`, que não é definida.
-9. A checklist pede **3** programas de exemplo; existem 2.
-10. Código e exemplos divergem: negação (`nam` × `não`), `de` (sinônimo de `se` no parser × `Ruma de Numero`), `faça` no cabeçalho de função, declaração com e sem tipo. `Lexer.hs` e a camada léxica de `Parser.hs` duplicam o mesmo trabalho.
-
-### Plano
-
-1. Escrever `docs/gramatica.ebnf` — a gramática é o contrato entre os módulos — e alinhar código e exemplos a ela (pendência 10).
-2. Fazer `main` compilar: corrigir `pFor`, limpar o Cabal, separar `library` / `executable` / `test-suite` (hspec + QuickCheck, conforme o README prevê).
-3. Completar a AST (com posição) e o parser até aceitar os 3 exemplos.
-4. Testes: válidos com AST esperada, inválidos, borda, erro com linha/coluna, round-trip via `Pretty.hs`.
-5. Camada de mensagens de erro; README com build/run/test e tabela de decisões.
-6. Conferir EBNF × parser e rodar a checklist da E2.
+1. A AST não guarda posição de origem. O erro de tipo precisa de linha e coluna, então o primeiro passo é decidir onde guardar a posição (o mais simples: nos comandos).
+2. `espia` e `quantoTem` aceitam mais de um tipo; o type checker vai tratá-las como casos embutidos, já que a linguagem não tem polimorfismo.
+3. A lista vazia `[]` só tem tipo pela declaração (`Ruma de Numero xs = []`).
+4. A linguagem não tem indexação, então "índice fora de faixa" não existe; o erro de execução a tratar é a divisão por zero.
 
 ## 5. Entregas e checklists
 
@@ -120,18 +108,16 @@ Cada entrega abre com o **enunciado oficial** do professor — é ele que define
 >
 > A primeira versão da linguagem (cuja implementação vai até o final do semestre) não precisa ter features muito avançadas, como tipos complexos, polimorfismo e concorrência. Pode se concentrar em tipos básicos, que suportem valores booleanos, inteiros, reais e strings. Eventualmente, um tipo compostos como o tipo list. Pensem quais serão as expressões e os 'statements' (comandos) suportados diretamente pela linguagem; e quais recursos devem ser implementados como funções em uma stdlib.
 
-- [x] Propósito declarado e justificado (README)
+- [x] Propósito declarado e justificado
 - [x] Paradigma declarado
 - [x] Sistema de tipos declarado, com trade-off
 - [x] Inspiração sintática identificada
-- [ ] Lista fechada de expressões — não há documento no repositório
-- [ ] Lista fechada de *statements* — idem
-- [ ] Fronteira núcleo × stdlib, com justificativa do corte — idem
-- [ ] 3 programas de exemplo (hello world, controle de fluxo, stdlib) — há 2, nenhum hello world
+- [x] Lista fechada de expressões ([docs/especificacao.md](docs/especificacao.md))
+- [x] Lista fechada de *statements*
+- [x] Fronteira núcleo × stdlib, com justificativa do corte
+- [x] 3 programas de exemplo (hello world, controle de fluxo, stdlib)
 - [ ] Cada integrante defende todas as decisões
-- [ ] Slides e exemplos versionados — slides não estão no repositório
-
-Os itens abertos da E1 são insumo direto da E2 (gramática) e da E3 (stdlib): fechar junto com a gramática.
+- [ ] Slides versionados
 
 ### Entrega 2 — Gramática e parser
 
@@ -139,17 +125,17 @@ Os itens abertos da E1 são insumo direto da E2 (gramática) e da E3 (stdlib): f
 
 "Parser" aqui é o macrocomponente: análise léxica **e** sintática.
 
-- [ ] Gramática formal (BNF/EBNF) versionada em `docs/`
-- [ ] Sem ambiguidade nas construções críticas: precedência e associatividade documentadas; *dangling else* tratado explicitamente (resolvido pelo terminador `cabousse` obrigatório — documentar)
-- [ ] Estratégia de parsing declarada e justificada, com a classe de gramática (LL(k), LR(1), PEG…)
-- [ ] Tokens definidos: lexemas, palavras reservadas, literais, comentários, whitespace; conflito identificador × palavra-chave tratado (`rword` com `notFollowedBy` já existe — documentar)
-- [ ] AST como tipo de dados explícito, separada da gramática concreta — existe, incompleta
-- [ ] Testes em três categorias: válidos (AST esperada), inválidos (rejeição), borda (arquivo vazio, aninhamento profundo, comentário não fechado)
-- [ ] Erros sintáticos com linha/coluna e mensagem inteligível
-- [ ] Os 3 exemplos da Entrega 1 aceitos pelo parser
-- [ ] Build e testes documentados no `README.md`
+- [x] Gramática formal (EBNF) versionada em `docs/`
+- [x] Sem ambiguidade: precedência e associatividade documentadas no cabeçalho da gramática; *dangling else* eliminado pelo `cabousse` obrigatório
+- [x] Estratégia de parsing declarada e justificada, com a classe de gramática (tabela de decisões do README)
+- [x] Tokens definidos; conflito identificador × palavra-chave tratado por `rword` e `pIdentifier`
+- [x] AST como tipo de dados explícito, separada da gramática concreta
+- [x] Testes em três categorias: válidos (AST esperada), inválidos (rejeição), borda (arquivo vazio, 100 níveis de aninhamento, prosa não fechada)
+- [x] Erros sintáticos com linha e coluna, conferidas em `ErroSpec`
+- [x] Os 3 exemplos aceitos pelo parser (teste em `StmtSpec` e etapa do CI)
+- [x] Build e testes documentados no `README.md`
 
-Observação: Frevo só tem comentário de linha (`#`), então "comentário não fechado" não se aplica como está. Cobrir o análogo (string não fechada) e registrar a justificativa.
+Frevo só tem comentário de linha, então "comentário não fechado" não se aplica; o análogo coberto é a prosa não fechada.
 
 ### Entrega 3 — Sistema de tipos e interpretador
 
