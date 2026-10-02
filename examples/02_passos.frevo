@@ -1,0 +1,29 @@
+# Conta os passos do frevo até a energia baixar
+
+Numero passos = 0
+Numero energia = 100
+Certeza cansado = Errado
+
+enquanto passos < 5 faça
+    passos = passos + 1
+    energia = energia - 10
+cabousse
+
+se energia > 50 e nam cansado então
+    espia("Massa demais! O frevo continua!")
+sinão
+    espia("Hora de tomar um caldinho e descansar")
+cabousse
+
+# Dá cinco voltas no salão, mas pula a terceira
+Numero volta = 0
+enquanto Certo faça
+    volta = volta + 1
+    se volta == 3 então
+        segue
+    cabousse
+    se volta > 5 então
+        poparrar
+    cabousse
+    espia(volta)
+cabousse
