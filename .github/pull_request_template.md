@@ -9,13 +9,13 @@
 ## Como testar
 
 ```sh
-cabal build all
-cabal test
+scripts/verificar.sh
 ```
 
 ## Antes de pedir revisão
 
-- [ ] `cabal build all --ghc-options=-Werror` passa
-- [ ] `cabal test` passa
+- [ ] `scripts/verificar.sh` passa
+- [ ] Tentei quebrar com entradas que os testes não cobrem (`.claude/rules/pronto.md`)
+- [ ] Rodei `/revisar-pr` e corrigi o que ela apontou
 - [ ] Se mudou a sintaxe: `docs/gramatica.ebnf`, parser e testes mudaram juntos
 - [ ] Sei explicar cada linha deste PR

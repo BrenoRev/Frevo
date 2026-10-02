@@ -25,20 +25,19 @@ Guarde a branch atual, faça checkout do PR e rode:
 
 ```sh
 gh pr checkout <n>
-cabal build all --ghc-options=-Werror
-cabal test --test-show-details=direct
-for f in examples/*.frevo; do cabal run -v0 Frevo -- "$f" > /dev/null || echo "REJEITADO: $f"; done
+scripts/verificar.sh
 ```
 
 Qualquer falha reprova o PR. Cole o trecho relevante da saída. Ao terminar, volte para a branch em que estava.
 
-Se a mudança mexe no parser, teste à mão ao menos uma entrada válida e uma inválida que os testes do PR não cobrem.
+Se a mudança mexe no parser, tente quebrá-lo com as entradas da seção 2 de `.claude/rules/pronto.md` (fronteira de token, palavra obrigatória removida, posição do erro, `\r\n` e BOM). Use entradas que os testes do PR não cobrem.
 
 ## 3. Está certo?
 
 Procure, nesta ordem:
 
-- Gramática (`docs/gramatica.ebnf`) e parser dizendo coisas diferentes.
+- Gramática (`docs/gramatica.ebnf`) e parser dizendo coisas diferentes, nos dois sentidos e inclusive no léxico. Parser pronto de biblioteca (`L.float`, `L.charLiteral`) costuma aceitar mais do que a gramática diz.
+- Afirmação em README, `CLAUDE.md` ou descrição do PR que não bate com o que você rodou.
 - Construção nova sem teste de rejeição, ou teste que só verifica que o parse não falhou.
 - `try` cobrindo um parser grande: esconde o erro real e piora a mensagem.
 - Ordem de alternativas em que um prefixo casa antes (`<` antes de `<=`, `se` antes de `segue`).
@@ -48,7 +47,7 @@ Procure, nesta ordem:
 
 ## 4. Segue as rules?
 
-Confira contra `.claude/rules/haskell.md`, `linguagem.md`, `testes.md` e `git.md`. Aponte só violações concretas, com `arquivo:linha`.
+Confira contra `.claude/rules/haskell.md`, `linguagem.md`, `testes.md`, `git.md` e `pronto.md`. Aponte só violações concretas, com `arquivo:linha`.
 
 Atenção especial a código inchado: comentário que repete o código, abstração sem segundo uso, camada que o enunciado não pede. Diga o que cortar.
 

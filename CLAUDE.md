@@ -50,7 +50,7 @@ Gramática: [docs/gramatica.ebnf](docs/gramatica.ebnf). Decisões e cortes: [doc
 2. **Nunca inventar dados.** Sem certeza sobre uma API, citação, regra da disciplina ou decisão do grupo: dizer que não sabe em vez de preencher com algo plausível. Lacuna é melhor que informação errada.
 3. **Explicar antes de implementar.** Antes de cada bloco de código relevante, 3–6 linhas: qual algoritmo, por que ele, quais alternativas foram descartadas.
 4. **Sabatina ao final.** Toda implementação significativa termina com 3 perguntas no estilo do professor ("por que X e não Y?", "o que acontece se a entrada for Z?", "qual o trade-off?").
-5. **Checklist antes de declarar pronto.** Rodar build, testes e hlint antes. Passar item a item pela checklist da entrega (§5), marcando `[x]`/`[ ]` explicitamente.
+5. **Checklist antes de declarar pronto.** Seguir [.claude/rules/pronto.md](.claude/rules/pronto.md): rodar `scripts/verificar.sh`, tentar quebrar com entradas novas, conferir gramática × parser e rodar `/revisar-pr`. Passar item a item pela checklist da entrega (§5), marcando `[x]`/`[ ]` explicitamente.
 6. **Não simplificar o problema para caber.** Nada de regex no lugar de parser, `eval` do host no lugar de interpretador, ou hardcode para passar em teste. Se algo for inviável, dizer e propor um recorte honesto — nunca um stub disfarçado.
 7. **Testes fazem parte da entrega.** Casos válidos, inválidos (rejeição) e de borda. Parser sem teste de rejeição não está pronto.
 8. **Idioma.** Respostas em português do Brasil. Identificadores Haskell em inglês. As palavras-chave e as mensagens de erro **da linguagem Frevo** são em português regional — isso é o propósito da linguagem, não uma violação da regra.
@@ -69,16 +69,15 @@ Gramática: [docs/gramatica.ebnf](docs/gramatica.ebnf). Decisões e cortes: [doc
 | [test/](test/) | hspec: `LexerSpec`, `ExprSpec`, `StmtSpec`, `ErroSpec` |
 | [examples/](examples/) | `01_bom_dia`, `02_passos`, `03_feira` — juntos usam toda a linguagem |
 | [docs/](docs/) | Gramática, especificação e o PDF do levantamento de vocabulário |
-| [.claude/rules/](.claude/rules/) | Padrões de código, linguagem, testes e git — **seguir sempre** |
+| [.claude/rules/](.claude/rules/) | Padrões de código, linguagem, testes, git e a definição de pronto — **seguir sempre** |
+| [scripts/verificar.sh](scripts/verificar.sh) | Tudo o que o CI roda, em um comando |
 | [.claude/skills/revisar-pr/](.claude/skills/revisar-pr/SKILL.md) | `/revisar-pr <n>`: revisão de PR antes do merge |
-| [.claude/skills/guia-estudo/](.claude/skills/guia-estudo/SKILL.md) | `/guia-estudo`: gera `docs/guia-de-estudo.pdf`, o material de estudo para a arguição |
+| [.claude/skills/guia-estudo/](.claude/skills/guia-estudo/SKILL.md) | `/guia-estudo`: gera `docs/guia-de-estudo.pdf`, o material de estudo para a arguição (gerado, fora do git) |
 | [.github/workflows/ci.yml](.github/workflows/ci.yml) | CI do PR: build com `-Werror`, testes, exemplos, hlint, padrão de commits |
 
 ```sh
-cabal build all --ghc-options=-Werror
-cabal test
+scripts/verificar.sh                          # build -Werror, testes, exemplos, hlint
 cabal run Frevo -- examples/03_feira.frevo
-hlint src app test
 ```
 
 ## 4. Estado atual e por onde seguir
