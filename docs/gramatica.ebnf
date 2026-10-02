@@ -1,0 +1,60 @@
+(* Gramática da linguagem Frevo.
+
+   Precedência, da menor para a maior:
+     ou              associa à esquerda
+     e               associa à esquerda
+     nam             prefixo
+     == <= >= < >    não associa: a < b < c é erro
+     + -             associa à esquerda
+     * /             associa à esquerda
+     -               prefixo
+
+   Todo bloco fecha com "cabousse", então não há dangling else.
+   Não há terminador de comando: todo comando começa por palavra
+   reservada, tipo ou identificador, e nenhuma expressão continua
+   com um desses. *)
+
+program = { fundef | stmt } ;
+
+fundef  = "função" ident "(" [ param { "," param } ] ")" "->" ( type | "Nadica" )
+          { stmt } "cabousse" ;
+param   = type ident ;
+type    = "Numero" | "Quebrado" | "Prosa" | "Certeza" | "Ruma" "de" type ;
+
+stmt    = type ident "=" expr
+        | ident "=" expr
+        | ident args
+        | "se" expr "então" { stmt } [ "sinão" { stmt } ] "cabousse"
+        | "enquanto" expr "faça" { stmt } "cabousse"
+        | "pracada" ident "em" expr "faça" { stmt } "cabousse"
+        | "devolve" expr
+        | "poparrar"
+        | "segue" ;
+
+expr    = and { "ou" and } ;
+and     = not { "e" not } ;
+not     = [ "nam" ] cmp ;
+cmp     = add [ ( "==" | "<=" | ">=" | "<" | ">" ) add ] ;
+add     = mul { ( "+" | "-" ) mul } ;
+mul     = unary { ( "*" | "/" ) unary } ;
+unary   = [ "-" ] primary ;
+primary = int | float | string | "Certo" | "Errado"
+        | "[" [ expr { "," expr } ] "]"
+        | ident [ args ]
+        | "(" expr ")" ;
+args    = "(" [ expr { "," expr } ] ")" ;
+
+(* Léxico *)
+
+ident   = ( letra | "_" ) { letra | digito | "_" } ;   (* exceto palavra reservada *)
+int     = digito { digito } ;
+float   = digito { digito } "." digito { digito } ;
+string  = '"' { caractere } '"' ;                      (* aceita \n, \t, \", \\ *)
+comment = "#" { qualquer caractere exceto fim de linha } ;
+
+(* Espaço, quebra de linha e comentário separam tokens e são descartados.
+
+   Palavras reservadas:
+     se então sinão cabousse enquanto faça pracada em poparrar segue
+     função devolve e ou nam Certo Errado
+     Numero Quebrado Prosa Certeza Ruma de Nadica *)
