@@ -40,11 +40,12 @@ reservedKeywords =
   ]
 
 pIdentifier :: Parser String
-pIdentifier = (lexeme . try) (getOffset >>= \start -> name >>= check start) <?> "nome"
+pIdentifier = (lexeme . try) identifier <?> "nome"
   where
-    name = (:) <$> (letterChar <|> char '_') <*> many identChar
-    -- Volta o offset para o erro apontar o começo da palavra, não o fim.
-    check start x
-      | x `elem` reservedKeywords =
-          setOffset start *> fail ("palavra reservada não pode ser usada como nome: " ++ x)
-      | otherwise = return x
+    identifier = do
+      start <- getOffset
+      name <- (:) <$> (letterChar <|> char '_') <*> many identChar
+      if name `elem` reservedKeywords
+        -- Volta o offset para o erro apontar o começo da palavra, não o fim.
+        then setOffset start *> fail ("palavra reservada não pode ser usada como nome: " ++ name)
+        else return name
