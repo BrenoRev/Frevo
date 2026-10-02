@@ -1,0 +1,21 @@
+# Exemplo de código na linguagem Frevo
+# Testa atribuição, repetição, condicional e retorno
+
+passos = 0
+energia = 100
+cansaco = Errado
+
+# Laço para contagem de passos da dança
+enquanto passos < 5 faça
+    passos = passos + 1
+    energia = energia - 10
+cabousse
+
+# Condicional para verificar a animação da festa
+se energia > 50 e cansaco == Errado então
+    mensagem = "Massa demais! O frevo continua!"
+    devolve mensagem
+sinão
+    mensagem = "Hora de tomar um caldinho e descansar"
+    devolve mensagem
+cabousse
