@@ -9,7 +9,7 @@ fi
 pandoc docs/guia-de-estudo.md \
   --from markdown --standalone \
   --metadata title="Frevo — guia de estudo" \
-  --css .claude/skills/guia-estudo/estilo.css \
+  --css scripts/guia/estilo.css \
   --pdf-engine weasyprint \
   --output docs/guia-de-estudo.pdf
 echo "docs/guia-de-estudo.pdf"

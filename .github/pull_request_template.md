@@ -4,7 +4,7 @@
 
 ## Entrega
 
-<!-- Qual entrega e qual item da checklist do CLAUDE.md este PR fecha. -->
+<!-- Qual entrega e qual item da checklist do AGENTS.md este PR fecha. -->
 
 ## Como testar
 
@@ -15,7 +15,7 @@ scripts/verificar.sh
 ## Antes de pedir revisão
 
 - [ ] `scripts/verificar.sh` passa
-- [ ] Tentei quebrar com entradas que os testes não cobrem (`.claude/rules/pronto.md`)
-- [ ] Rodei `/revisar-pr` e corrigi o que ela apontou
+- [ ] Tentei quebrar com entradas que os testes não cobrem (`docs/regras/pronto.md`)
+- [ ] Revisei pelo `docs/procedimentos/revisar-pr.md` e corrigi o que apareceu
 - [ ] Se mudou a sintaxe: `docs/gramatica.ebnf`, parser e testes mudaram juntos
 - [ ] Sei explicar cada linha deste PR

@@ -42,6 +42,10 @@ scripts/verificar.sh                             # tudo o que o CI roda: build, 
 
 Em erro de sintaxe, o programa mostra linha, coluna e o trecho do código, e sai com código 1.
 
+## Trabalhando com assistentes de IA
+
+O contexto do projeto para qualquer assistente (Claude Code, Codex, Cursor, Copilot, Gemini…) está em [AGENTS.md](AGENTS.md). As regras ficam em [docs/regras/](docs/regras/) e os procedimentos (revisão de PR, guia de estudo) em [docs/procedimentos/](docs/procedimentos/). Se a sua ferramenta não lê `AGENTS.md` sozinha, peça para ela ler esse arquivo no começo da conversa.
+
 ## Decisões da Entrega 2
 
 | Decisão | Escolha | Alternativa descartada |

@@ -1,11 +1,6 @@
----
-paths:
-  - "src/**/*.hs"
-  - "app/**/*.hs"
-  - "test/**/*.hs"
----
-
 # Código Haskell
+
+Vale para todo código em `src/`, `app/` e `test/`.
 
 - Compila sem warning em `-Wall`. O CI usa `-Werror`.
 - Sem `error`, `undefined`, `head`, `fromJust` nem outra função parcial.

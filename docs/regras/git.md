@@ -1,6 +1,6 @@
 # Git
 
-- Antes de commitar código: `scripts/verificar.sh`. Antes de abrir PR: `.claude/rules/pronto.md` inteiro.
+- Antes de commitar código: `scripts/verificar.sh`. Antes de abrir PR: `docs/regras/pronto.md` inteiro.
 - `main` sempre compila e só recebe merge por PR com o CI verde.
 - Uma branch por frente de trabalho, um integrante por PR: o histórico mostra quem fez o quê.
 - Conventional Commits: `feat:`, `fix:`, `test:`, `docs:`, `refactor:`, `build:`, `ci:`, `chore:`. Um commit por passo concluído.

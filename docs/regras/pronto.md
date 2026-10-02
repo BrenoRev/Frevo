@@ -5,7 +5,7 @@ Código só é dado como pronto, commitado ou enviado para revisão depois de pa
 ## 1. Rodar, não supor
 
 - `scripts/verificar.sh` passa: build com `-Werror`, testes, exemplos e hlint.
-- Nada é descrito como funcionando sem ter sido executado. Vale para o código e para a documentação: versão de compilador, número de testes e saída de programa citados em README, `CLAUDE.md` ou PR são copiados de uma execução real.
+- Nada é descrito como funcionando sem ter sido executado. Vale para o código e para a documentação: versão de compilador, número de testes e saída de programa citados em README, `AGENTS.md` ou PR são copiados de uma execução real.
 
 ## 2. Tentar quebrar
 
@@ -31,5 +31,5 @@ Quebre o código de propósito (troque a ordem de duas alternativas, apague uma 
 ## 5. Revisar antes de pedir revisão
 
 - Releia o diff inteiro procurando o que cortar: comentário que repete o código, linha que faz três coisas, nome que precisa de explicação.
-- Documentação e checklists do `CLAUDE.md` batem com o código depois da mudança, inclusive nas seções que a mudança não tocou diretamente.
-- Rode `/revisar-pr` no próprio PR e corrija o que ela apontar antes de chamar outra pessoa.
+- Documentação e checklists do `AGENTS.md` batem com o código depois da mudança, inclusive nas seções que a mudança não tocou diretamente.
+- Revise o próprio PR seguindo `docs/procedimentos/revisar-pr.md` e corrija o que aparecer antes de chamar outra pessoa.
