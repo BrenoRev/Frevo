@@ -31,7 +31,7 @@ A linguagem segue a tradição didática do Portugol quanto ao caráter pedagóg
 
 ## Como usar
 
-Requer GHC 9.6 ou mais novo e Cabal, instalados pelo [GHCup](https://www.haskell.org/ghcup/).
+Requer GHC e Cabal, instalados pelo [GHCup](https://www.haskell.org/ghcup/). Testado com GHC 9.10.3, a mesma versão do CI.
 
 ```sh
 cabal build all                                  # compila

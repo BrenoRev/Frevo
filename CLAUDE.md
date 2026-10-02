@@ -9,7 +9,7 @@ A avaliação de cada entrega é **oral e individual**. Código que roda não ga
 | Campo | Valor |
 |---|---|
 | Nome / extensão | Frevo / `.frevo` |
-| Host | Haskell (Cabal, GHC 9.6 ou mais novo; o CI usa 9.10.3) |
+| Host | Haskell (Cabal; testado com GHC 9.10.3, a versão do CI) |
 | Estratégia de parsing | Parser combinators (Megaparsec + `parser-combinators`) |
 | Propósito | Específico (DSL): ensino de programação para crianças, com vocabulário pernambucano |
 | Paradigma | Imperativo |
@@ -147,7 +147,7 @@ Frevo só tem comentário de linha, então "comentário não fechado" não se ap
 - [ ] Erros de tipo com posição e tipo esperado × encontrado
 - [ ] Semântica operacional documentada (small-step ou big-step, justificado), com correspondência regra ↔ código do interpretador
 - [ ] Interpretador sobre a AST, com ambiente de execução separado do ambiente de tipos
-- [ ] Erros de execução (divisão por zero, índice fora de faixa) tratados e distintos dos erros de tipo
+- [ ] Erros de execução (divisão por zero) tratados e distintos dos erros de tipo
 - [ ] Testes de rejeição: programa mal tipado falha na checagem, não na execução
 - [ ] Stdlib mínima conforme a fronteira da Entrega 1
 - [ ] Cada integrante explica por que uma regra é *sound* (ou onde não é)

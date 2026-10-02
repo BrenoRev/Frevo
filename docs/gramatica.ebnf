@@ -48,11 +48,15 @@ args    = "(" [ expr { "," expr } ] ")" ;
 
 ident   = ( letra | "_" ) { letra | digito | "_" } ;   (* exceto palavra reservada *)
 int     = digito { digito } ;
-float   = digito { digito } "." digito { digito } ;
-string  = '"' { caractere } '"' ;                      (* aceita \n, \t, \", \\ *)
+float   = digito { digito } "." digito { digito } [ expoente ]
+        | digito { digito } expoente ;
+expoente = ( "e" | "E" ) [ "+" | "-" ] digito { digito } ;
+string  = '"' { caractere } '"' ;   (* escapes como em Haskell: \n, \t, \", \\ ;
+                                       pode ocupar mais de uma linha *)
 comment = "#" { qualquer caractere exceto fim de linha } ;
 
 (* Espaço, quebra de linha e comentário separam tokens e são descartados.
+   Um número não pode vir colado em letra: "2pac" é erro.
 
    Palavras reservadas:
      se então sinão cabousse enquanto faça pracada em poparrar segue
