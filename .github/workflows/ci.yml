@@ -24,9 +24,6 @@ jobs:
             exit 1
           fi
 
-      - name: Gramática versionada
-        run: test -s docs/gramatica.ebnf
-
       - uses: haskell-actions/setup@v2
         id: setup
         with:
@@ -39,17 +36,8 @@ jobs:
           key: cabal-${{ runner.os }}-${{ hashFiles('Frevo.cabal') }}
           restore-keys: cabal-${{ runner.os }}-
 
-      - name: Build
-        run: cabal build all --enable-tests --ghc-options=-Werror
-
-      - name: Testes
-        run: cabal test --test-show-details=direct
-
-      - name: Exemplos aceitos pelo parser
-        run: |
-          for f in examples/*.frevo; do
-            cabal run -v0 Frevo -- "$f" > /dev/null || { echo "Rejeitado: $f"; exit 1; }
-          done
+      - name: Build, testes e exemplos
+        run: scripts/verificar.sh
 
       - uses: haskell-actions/hlint-setup@v2
       - uses: haskell-actions/hlint-run@v2

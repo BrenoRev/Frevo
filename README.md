@@ -37,6 +37,7 @@ Requer GHC e Cabal, instalados pelo [GHCup](https://www.haskell.org/ghcup/). Tes
 cabal build all                                  # compila
 cabal run Frevo -- examples/03_feira.frevo       # imprime a AST do programa
 cabal test                                       # roda a suíte de testes
+scripts/verificar.sh                             # tudo o que o CI roda: build, testes, exemplos e lint
 ```
 
 Em erro de sintaxe, o programa mostra linha, coluna e o trecho do código, e sai com código 1.
