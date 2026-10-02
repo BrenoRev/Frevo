@@ -1,0 +1,24 @@
+# Soma o que painho vai pagar na feira
+
+função somaTudo(Ruma de Quebrado precos) -> Quebrado
+    Quebrado total = 0.0
+    pracada preco em precos faça
+        total = total + preco
+    cabousse
+    devolve total
+cabousse
+
+função avisa(Quebrado total, Quebrado limite) -> Nadica
+    se total > limite então
+        espia("Vixe, painho vai reclamar")
+    sinão
+        espia("Tá massa, deu pra tudo")
+    cabousse
+cabousse
+
+Ruma de Quebrado precos = [4.5, 6.0, 3.25]
+Prosa nome = pergunta("Quem vai pra feira? ")
+
+espia(encanga("Bora, ", nome))
+espia(quantoTem(precos))
+avisa(somaTudo(precos), 10.0)

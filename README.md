@@ -29,6 +29,39 @@ A linguagem segue a tradição didática do Portugol quanto ao caráter pedagóg
 
 ---
 
+## Como usar
+
+Requer GHC e Cabal, instalados pelo [GHCup](https://www.haskell.org/ghcup/). Testado com GHC 9.10.3, a mesma versão do CI.
+
+```sh
+cabal build all                                  # compila
+cabal run Frevo -- examples/03_feira.frevo       # imprime a AST do programa
+cabal test                                       # roda a suíte de testes
+scripts/verificar.sh                             # tudo o que o CI roda: build, testes, exemplos e lint
+```
+
+Em erro de sintaxe, o programa mostra linha, coluna e o trecho do código, e sai com código 1.
+
+## Trabalhando com assistentes de IA
+
+O contexto do projeto para qualquer assistente (Claude Code, Codex, Cursor, Copilot, Gemini…) está em [AGENTS.md](AGENTS.md). As regras ficam em [docs/regras/](docs/regras/) e os procedimentos (revisão de PR, guia de estudo) em [docs/procedimentos/](docs/procedimentos/). Se a sua ferramenta não lê `AGENTS.md` sozinha, peça para ela ler esse arquivo no começo da conversa.
+
+## Decisões da Entrega 2
+
+| Decisão | Escolha | Alternativa descartada |
+|---|---|---|
+| Estratégia de parsing | Parser combinators (Megaparsec), descida recursiva | Gerador (Happy/Alex): mais uma linguagem para aprender e erros piores |
+| Classe da gramática | LL(1) no nível de tokens | LR: desnecessário, a gramática não tem recursão à esquerda depois da fatoração |
+| Análise léxica | Integrada ao parser (scannerless) | Lexer separado: exigiria token com posição e instância de `Stream` |
+| Precedência de operadores | Tabela declarativa (`makeExprParser`) | Uma função por nível: mesmo resultado, mais código |
+| *Dangling else* | Todo bloco fecha com `cabousse` | Regra do "else mais próximo": deixa a ambiguidade na gramática |
+| Fim de comando | Sem terminador | `;` ou quebra de linha significativa: mais uma regra para a criança errar |
+| Erros | Mensagem do Megaparsec com linha e coluna | Camada própria de mensagens: mais código sem exigência do enunciado |
+
+A gramática está em [docs/gramatica.ebnf](docs/gramatica.ebnf) e a especificação em [docs/especificacao.md](docs/especificacao.md).
+
+---
+
 ## Entrega 1: Definição da linguagem
 
 Marco sem exigência de implementação. O produto é a especificação da linguagem e sua defesa oral.
@@ -145,49 +178,41 @@ Montagem do parser completo do programa, com consumo de espaço inicial e exigê
 
 ### 2.10 Implementação da camada de reporte de erros
 
-Construção da camada que converte o erro do parser em mensagem final, preservando linha e coluna e substituindo o vocabulário padrão da biblioteca pelo banco de mensagens definido na Entrega 1.
+Rótulos em português nos parsers e ajuste da posição do erro de palavra reservada, para que a mensagem aponte linha e coluna do ponto exato da falha.
 
-### 2.11 Implementação do pretty printer
-
-Implementação do caminho inverso, de AST para texto. Não consta na checklist da entrega, mas é pré-requisito do teste de propriedade descrito em 2.15.
-
-### 2.12 Suíte de testes: programas válidos
+### 2.11 Suíte de testes: programas válidos
 
 Escrita dos casos de programas sintaticamente válidos, com comparação estrutural contra a AST esperada. Verificar que o parse não falhou é insuficiente: o teste compara a árvore produzida.
 
-### 2.13 Suíte de testes: programas inválidos
+### 2.12 Suíte de testes: programas inválidos
 
 Escrita dos casos de rejeição obrigatória, cobrindo uso de palavra reservada como identificador, bloco sem terminador, operador sem operando e construções proibidas pela gramática.
 
-### 2.14 Suíte de testes: casos de borda
+### 2.13 Suíte de testes: casos de borda
 
-Escrita dos casos de borda exigidos: arquivo vazio, expressões profundamente aninhadas geradas programaticamente, e comentário de bloco não fechado.
+Escrita dos casos de borda exigidos: arquivo vazio, expressões profundamente aninhadas geradas programaticamente, e prosa não fechada (a linguagem só tem comentário de linha).
 
-### 2.15 Teste de propriedade de ida e volta
-
-Implementação do teste que gera árvores sintáticas aleatórias, as imprime como texto e as parseia de volta, exigindo igualdade com a árvore original. Requer instância de geração com controle de profundidade.
-
-### 2.16 Verificação dos erros com posição
+### 2.14 Verificação dos erros com posição
 
 Testes específicos que confirmam que o erro reportado aponta a linha e a coluna corretas, e não apenas que o parse falhou.
 
-### 2.17 Validação dos programas de exemplo da Entrega 1
+### 2.15 Validação dos programas de exemplo da Entrega 1
 
 Execução do parser sobre os três programas de exemplo produzidos no primeiro marco, exigidos como aceitos pela checklist.
 
-### 2.18 Redação do README
+### 2.16 Redação do README
 
 Documentação dos comandos de build, de execução e de teste na raiz do repositório, junto da tabela de decisões de projeto do marco.
 
-### 2.19 Revisão da gramática contra a implementação
+### 2.17 Revisão da gramática contra a implementação
 
 Conferência item a item entre o arquivo EBNF e o parser implementado, para garantir que a gramática versionada descreve o que o código de fato aceita.
 
-### 2.20 Verificação final contra a checklist
+### 2.18 Verificação final contra a checklist
 
 Passagem explícita por cada item da checklist obrigatória do marco, com marcação de concluído ou pendente.
 
-### 2.21 Preparação para a avaliação individual
+### 2.19 Preparação para a avaliação individual
 
 Leitura cruzada do código entre os integrantes, de modo que cada um consiga explicar módulos que não escreveu.
 
@@ -200,7 +225,6 @@ Leitura cruzada do código entre os integrantes, de modo que cada um consiga exp
 | Entrega 1 | Especificação da linguagem | `docs/` |
 | Entrega 1 | Registro de vocabulário e descartes | `docs/` |
 | Entrega 1 | Programas de exemplo | `examples/` |
-| Entrega 1 | Slides da apresentação | `docs/` |
 | Entrega 2 | Gramática formal em EBNF | `docs/` |
 | Entrega 2 | AST, camada léxica e parser | `src/` |
 | Entrega 2 | Executável de linha de comando | `app/` |
@@ -214,6 +238,6 @@ Leitura cruzada do código entre os integrantes, de modo que cada um consiga exp
 | Repositório | Um único repositório Git por grupo |
 | Branch principal | `main` sempre em estado que compila |
 | Commits | Padrão Conventional Commits, pequenos e atômicos |
-| Fluxo | Branch de feature com pull request |
+| Fluxo | Branch de feature com pull request; o CI valida build, testes, exemplos e lint |
 | Histórico | Contribuição visível de todos os integrantes |
 | Build | Nenhum artefato de build versionado |

@@ -1,153 +1,51 @@
-module Lexer where
+{-# LANGUAGE OverloadedStrings #-}
+module Frevo.Lexer where
 
-import Data.Char (isDigit, isAlpha, isSpace, isAlphaNum)
-import qualified Data.Text.Lazy as TL
-import qualified Data.Text.Lazy.IO as TLIO
-import System.Environment (getArgs)
+import Data.Text (Text)
+import Data.Void (Void)
+import Text.Megaparsec
+import Text.Megaparsec.Char
+import qualified Text.Megaparsec.Char.Lexer as L
 
-data Token
-    = TokInt Int
-    | TokFloat Double
-    | TokIdent String
-    | TokStr String
-    | TokBool Bool
-    | TokIntT
-    | TokFloatT
-    | TokStrT
-    | TokBoolT
-    | TokArray
-    | TokOpenPar
-    | TokClosePar
-    | TokEnd
-    | TokIf
-    | TokThen
-    | TokFor
-    | TokIn
-    | TokDo
-    | TokElse
-    | TokCont
-    | TokWhile
-    | TokBreak
-    | TokFun 
-    | TokAnd
-    | TokOr
-    | TokNot
-    | TokUnit
-    | TokOpen
-    | TokComma 
-    | TokReturn
-    | TokArrow
-    | TokEq
-    | TokAtri 
-    | TokPlus
-    | TokMinus 
-    | TokDiv
-    | TokMult
-    | TokLe 
-    | TokLt 
-    | TokGe 
-    | TokGt
-    | TokEOF
-    | TokError
-    | TokOf
-    | TokOpenBra
-    | TokCloseBra
-    | TokNewLine
-    deriving (Show, Eq)
+type Parser = Parsec Void Text
 
-classifyIdent :: String -> Token
-classifyIdent "de"       = TokIf
-classifyIdent "se"       = TokIf
-classifyIdent "sinão"    = TokElse
-classifyIdent "enquanto" = TokWhile
-classifyIdent "faça"     = TokDo
-classifyIdent "em"       = TokIn
-classifyIdent "poparrar" = TokBreak
-classifyIdent "cabousse" = TokEnd
-classifyIdent "pracada"  = TokFor
-classifyIdent "devolve"  = TokReturn
-classifyIdent "função"   = TokFun
-classifyIdent "segue"    = TokCont
-classifyIdent "então"    = TokThen
-classifyIdent "e"        = TokAnd
-classifyIdent "ou"       = TokOr
-classifyIdent "nam"      = TokNot
-classifyIdent "Certeza"  = TokBoolT
-classifyIdent "Certo"    = TokBool True
-classifyIdent "Errado"   = TokBool False
-classifyIdent "Ruma"     = TokArray
-classifyIdent "Nadica"   = TokUnit
-classifyIdent "Prosa"    = TokStrT
-classifyIdent "Quebrado" = TokFloatT
-classifyIdent "Numero"   = TokIntT
-classifyIdent other      = TokIdent other
+sc :: Parser ()
+sc = L.space space1 (L.skipLineComment "#") empty
 
+lexeme :: Parser a -> Parser a
+lexeme = L.lexeme sc
 
-spanNum :: String -> String -> Bool -> (Token, String)
-spanNum [] num float 
-  | float     = ((TokFloat (read num)), "")
-  | otherwise = ((TokInt (read num)), "")
+symbol :: Text -> Parser Text
+symbol = L.symbol sc
 
-spanNum (c:cs) num float
-  | isDigit c                = spanNum cs (num++[c]) float
-  | c == '.' && not float    = spanNum cs (num++[c]) True
-  | c == '.' && float        = error ("\n\nError léxico:\nNúmero quebrado com mais de um ponto")
-  | isAlpha c                = error ("\n\nError léxico:\nLetra inesperada no meio de um número: "++[c])
-  | not (isDigit c) && float = ((TokFloat (read num)), (c:cs))
-  | not (isDigit c)          = ((TokInt (read num)), (c:cs))
-  | otherwise                = error ("\n\nError léxico:\nDigito inesperado: " ++ [c] )
+parens :: Parser a -> Parser a
+parens = between (symbol "(") (symbol ")")
 
+brackets :: Parser a -> Parser a
+brackets = between (symbol "[") (symbol "]")
 
-lexer :: String -> [Token]
-lexer [] = [TokEOF]
+identChar :: Parser Char
+identChar = alphaNumChar <|> char '_'
 
-lexer ('#':rest) = 
-  let afterComment = dropWhile (/= '\n') rest
-  in lexer afterComment 
+-- Sem o notFollowedBy, "se" casaria com o começo de "segue" ou "sementes".
+rword :: Text -> Parser ()
+rword w = (lexeme . try) (string w *> notFollowedBy identChar)
 
-lexer ('=':'=':cs) = TokEq    : lexer cs
-lexer ('>':'=':cs) = TokGe    : lexer cs
-lexer ('<':'=':cs) = TokLe    : lexer cs
-lexer ('-':'>':cs) = TokArrow : lexer cs
+reservedKeywords :: [String]
+reservedKeywords =
+  [ "se", "então", "sinão", "cabousse", "enquanto", "faça", "pracada", "em"
+  , "poparrar", "segue", "função", "devolve", "e", "ou", "nam"
+  , "Certo", "Errado", "Numero", "Quebrado", "Prosa", "Certeza"
+  , "Ruma", "de", "Nadica"
+  ]
 
-lexer ('[':cs) = TokOpenBra  : lexer cs
-lexer (']':cs) = TokCloseBra : lexer cs
-lexer ('=':cs) = TokAtri     : lexer cs
-lexer ('>':cs) = TokGt       : lexer cs
-lexer ('<':cs) = TokLt       : lexer cs
-lexer ('-':cs) = TokMinus    : lexer cs
-lexer ('+':cs) = TokPlus     : lexer cs
-lexer ('*':cs) = TokMult     : lexer cs
-lexer ('/':cs) = TokDiv      : lexer cs
-lexer (',':cs) = TokComma    : lexer cs
-lexer ('(':cs) = TokOpenPar  : lexer cs
-lexer (')':cs) = TokClosePar : lexer cs
-
-
-lexer ('"':cs) =
-    let (str, rest) = span (/= '"') cs
-    in case rest of
-        ('"':after) -> TokStr str : lexer after
-        _           -> error ("\n\nError léxico:\nString não fechada")
-
-lexer (c:cs)
-  | c == '\n' = TokNewLine : lexer cs
-  | isSpace c = lexer cs
-  | isDigit c = 
-      let (token, rest) = spanNum (c:cs) "" False
-      in token : lexer rest
-  | isAlpha c =
-      let (ident, rest) = span isAlphaNum (c:cs)
-      in classifyIdent ident : lexer rest
-  | otherwise = error ("\n\nError léxico:\nCharacter inesperado: " ++ [c])
-
-main :: IO ()
-main = do
-    args <- getArgs
-    case args of 
-        []           -> putStrLn "Nenhum caminho para arquivo foi passado"
-        (fileName:_) -> do
-            rawContent <- TLIO.readFile fileName
-            let content = TL.unpack rawContent
-            let tokens = lexer content
-            print tokens
+pIdentifier :: Parser String
+pIdentifier = (lexeme . try) identifier <?> "nome"
+  where
+    identifier = do
+      start <- getOffset
+      name <- (:) <$> (letterChar <|> char '_') <*> many identChar
+      if name `elem` reservedKeywords
+        -- Volta o offset para o erro apontar o começo da palavra, não o fim.
+        then setOffset start *> fail ("palavra reservada não pode ser usada como nome: " ++ name)
+        else return name

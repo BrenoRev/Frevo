@@ -1,56 +1,38 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Frevo.Parser where
 
-import Frevo.AST
+import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Data.Text (Text)
 import Data.Void (Void)
+import Frevo.AST
+import Frevo.Lexer
 import Text.Megaparsec
-import Text.Megaparsec.Char
+import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as L
-import Control.Monad.Combinators.Expr (makeExprParser, Operator(..))
 
-type Parser = Parsec Void Text
-
-sc :: Parser ()
-sc = L.space space1 (L.skipLineComment "#") empty
-
-lexeme :: Parser a -> Parser a
-lexeme = L.lexeme sc
-
-symbol :: Text -> Parser Text
-symbol = L.symbol sc
-
-rword :: Text -> Parser ()
-rword w = (lexeme . try) (string w *> notFollowedBy alphaNumChar)
+-- Número colado em letra ("2pac") é erro, não um número seguido de um nome.
+number :: Parser a -> Parser a
+number p = lexeme (p <* notFollowedBy identChar)
 
 pInteger :: Parser Expr
-pInteger = EInt <$> lexeme L.decimal
+pInteger = EInt <$> number L.decimal
 
 pFloat :: Parser Expr
-pFloat = EFloat <$> lexeme L.float
+pFloat = EFloat <$> number L.float
 
 pString :: Parser Expr
 pString = EStr <$> lexeme (char '"' *> manyTill L.charLiteral (char '"'))
 
 pBool :: Parser Expr
-pBool = (EBool True <$ rword "Certo")
-    <|> (EBool False <$ rword "Errado")
+pBool = EBool True <$ rword "Certo" <|> EBool False <$ rword "Errado"
 
-pIdentifier :: Parser String
-pIdentifier = (lexeme . try) (p >>= check)
-  where
-    p = (:) <$> (letterChar <|> char '_') <*> many (alphaNumChar <|> char '_')
-    check x = if x `elem` reservedKeywords
-                then fail $ "Palavra reservada não pode ser usada como identificador: " ++ x
-                else return x
+pArgs :: Parser [Expr]
+pArgs = parens (pExpr `sepBy` symbol ",")
 
-reservedKeywords :: [String]
-reservedKeywords =
-  [ "de", "se", "sinão", "enquanto", "faça", "cabousse"
-  , "pracada", "devolve", "função", "então", "nam", "e", "ou"
-  , "Certo", "Errado", "Certeza", "Ruma", "Nadica", "Prosa"
-  , "Quebrado", "Numero", "poparrar", "segue"
-  ]
+pCallOrVar :: Parser Expr
+pCallOrVar = do
+  name <- pIdentifier
+  ECall name <$> pArgs <|> pure (EVar name)
 
 pTerm :: Parser Expr
 pTerm = choice
@@ -58,30 +40,38 @@ pTerm = choice
   , pInteger
   , pBool
   , pString
-  , EVar <$> pIdentifier
-  , between (symbol "(") (symbol ")") pExpr
+  , EList <$> brackets (pExpr `sepBy` symbol ",")
+  , pCallOrVar
+  , parens pExpr
   ]
 
 pExpr :: Parser Expr
-pExpr = makeExprParser pTerm operatorTable
+pExpr = makeExprParser pTerm operatorTable <?> "expressão"
 
+-- Da maior para a menor precedência.
 operatorTable :: [[Operator Parser Expr]]
 operatorTable =
-  [ [ InfixL (EBinOp Mul <$ symbol "*")
-    , InfixL (EBinOp Div <$ symbol "/")
-    ]
-  , [ InfixL (EBinOp Add <$ symbol "+")
-    , InfixL (EBinOp Sub <$ symbol "-")
-    ]
-  , [ InfixN (EBinOp Eq <$ symbol "==")
-    , InfixN (EBinOp Le <$ symbol "<=")
-    , InfixN (EBinOp Ge <$ symbol ">=")
-    , InfixN (EBinOp Lt <$ symbol "<")
-    , InfixN (EBinOp Gt <$ symbol ">")
-    ]
-  , [ InfixL (EBinOp And <$ rword "e")
-    , InfixL (EBinOp Or  <$ rword "ou")
-    ]
+  [ [ Prefix (ENeg <$ symbol "-") ]
+  , [ binary Mul "*", binary Div "/" ]
+  , [ binary Add "+", binary Sub "-" ]
+    -- "<=" e ">=" vêm antes de "<" e ">", senão o símbolo curto casa primeiro.
+  , [ comparison Eq "==", comparison Le "<=", comparison Ge ">="
+    , comparison Lt "<", comparison Gt ">" ]
+  , [ Prefix (ENot <$ rword "nam") ]
+  , [ InfixL (EBinOp And <$ rword "e") ]
+  , [ InfixL (EBinOp Or <$ rword "ou") ]
+  ]
+  where
+    binary op s = InfixL (EBinOp op <$ symbol s)
+    comparison op s = InfixN (EBinOp op <$ symbol s)
+
+pType :: Parser Type
+pType = choice
+  [ TInt <$ rword "Numero"
+  , TFloat <$ rword "Quebrado"
+  , TStr <$ rword "Prosa"
+  , TBool <$ rword "Certeza"
+  , TArray <$> (rword "Ruma" *> rword "de" *> pType)
   ]
 
 pStmt :: Parser Stmt
@@ -89,49 +79,61 @@ pStmt = choice
   [ pIf
   , pWhile
   , pFor
-  , pReturn
-  , pAssign
+  , SReturn <$> (rword "devolve" *> pExpr)
+  , SBreak <$ rword "poparrar"
+  , SContinue <$ rword "segue"
+  , SDecl <$> pType <*> pIdentifier <* symbol "=" <*> pExpr
+  , pAssignOrCall
   ]
+
+pBlock :: Parser [Stmt]
+pBlock = many pStmt
 
 pIf :: Parser Stmt
 pIf = do
-  _ <- rword "se" <|> rword "de"
+  rword "se"
   cond <- pExpr
-  _ <- rword "então"
-  thenBody <- many pStmt
-  elseBody <- optional (rword "sinão" *> many pStmt)
-  _ <- rword "cabousse"
+  rword "então"
+  thenBody <- pBlock
+  elseBody <- optional (rword "sinão" *> pBlock)
+  rword "cabousse"
   return (SIf cond thenBody elseBody)
 
 pWhile :: Parser Stmt
 pWhile = do
-  _ <- rword "enquanto"
+  rword "enquanto"
   cond <- pExpr
-  _ <- rword "faça"
-  body <- many pStmt
-  _ <- rword "cabousse"
+  rword "faça"
+  body <- pBlock
+  rword "cabousse"
   return (SWhile cond body)
 
 pFor :: Parser Stmt
 pFor = do
-    _ <- rword "pracada"
-    var <- pIdentifier
-    _ <- rword "em"
-    iterable <- pExpr
-    _ <- rword "faça"
-    body <- many pStmt
-    _ <- rword "cabousse"
-    return (SFor var body)
-
-pReturn :: Parser Stmt
-pReturn = SReturn <$> (rword "devolve" *> pExpr)
-
-pAssign :: Parser Stmt
-pAssign = do
+  rword "pracada"
   var <- pIdentifier
-  _ <- symbol "="
-  val <- pExpr
-  return (SAssign var val)
+  rword "em"
+  iterable <- pExpr
+  rword "faça"
+  body <- pBlock
+  rword "cabousse"
+  return (SFor var iterable body)
+
+pAssignOrCall :: Parser Stmt
+pAssignOrCall = do
+  name <- pIdentifier
+  SAssign name <$> (symbol "=" *> pExpr) <|> SCall name <$> pArgs
+
+pFun :: Parser Stmt
+pFun = do
+  rword "função"
+  name <- pIdentifier
+  params <- parens (((,) <$> pType <*> pIdentifier) `sepBy` symbol ",")
+  _ <- symbol "->"
+  ret <- pType <|> TUnit <$ rword "Nadica"
+  body <- pBlock
+  rword "cabousse"
+  return (SFun name params ret body)
 
 parseProgram :: FilePath -> Text -> Either (ParseErrorBundle Text Void) [Stmt]
-parseProgram filename input = runParser (sc *> many pStmt <* eof) filename input
+parseProgram = runParser (sc *> many (pFun <|> pStmt) <* eof)

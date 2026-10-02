@@ -1,0 +1,46 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Commits no padrão Conventional Commits
+        if: github.event_name == 'pull_request'
+        run: |
+          padrao='^(feat|fix|test|docs|refactor|build|ci|chore)(\([a-z0-9-]+\))?: .+'
+          ruins=$(git log --no-merges --format=%s "origin/${{ github.base_ref }}..${{ github.event.pull_request.head.sha }}" | grep -Ev "$padrao" || true)
+          if [ -n "$ruins" ]; then
+            echo "Commits fora do padrão:"
+            echo "$ruins"
+            exit 1
+          fi
+
+      - uses: haskell-actions/setup@v2
+        id: setup
+        with:
+          ghc-version: '9.10.3'
+          cabal-version: '3.16'
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.setup.outputs.cabal-store }}
+          key: cabal-${{ runner.os }}-${{ hashFiles('Frevo.cabal') }}
+          restore-keys: cabal-${{ runner.os }}-
+
+      - name: Build, testes e exemplos
+        run: scripts/verificar.sh
+
+      - uses: haskell-actions/hlint-setup@v2
+      - uses: haskell-actions/hlint-run@v2
+        with:
+          path: '["src/", "app/", "test/"]'
+          fail-on: suggestion

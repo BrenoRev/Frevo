@@ -1,1 +1,0 @@
-AST de volta para texto (serve o teste de ida e volta)
