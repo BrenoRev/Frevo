@@ -1,2 +1,7 @@
 dist/
 dist-newstyle/
+.DS_Store
+
+# Gerado pela skill guia-estudo
+docs/guia-de-estudo.md
+docs/guia-de-estudo.pdf

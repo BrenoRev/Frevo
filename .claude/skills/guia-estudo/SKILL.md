@@ -6,7 +6,7 @@ argument-hint: "[número da entrega, ou vazio para todas as concluídas]"
 
 # Guia de estudo das entregas
 
-Escreve `docs/guia-de-estudo.md` e gera `docs/guia-de-estudo.pdf`. O leitor é um integrante do grupo que vai ser arguido individualmente e precisa entender o que foi construído, inclusive as partes que não escreveu.
+Escreve `docs/guia-de-estudo.md` e gera `docs/guia-de-estudo.pdf` (ambos fora do git). O leitor é um integrante do grupo que vai ser arguido individualmente e precisa entender o que foi construído, inclusive as partes que não escreveu.
 
 Se vier um número em `$ARGUMENTS`, atualize só a seção daquela entrega e mantenha as outras. Sem argumento, cubra todas as entregas concluídas.
 
@@ -58,4 +58,4 @@ Precisa de `pandoc` e `weasyprint` (`brew install pandoc weasyprint`). Abra o PD
 - Vocabulário e precedência batem com `reservedKeywords` e `operatorTable`.
 - O guia não menciona nada que foi cortado da linguagem como se existisse.
 
-Não faça commit do guia sem pedido.
+O guia é material gerado: os dois arquivos estão no `.gitignore` e não entram em commit nem em PR. Cada integrante gera o seu.
