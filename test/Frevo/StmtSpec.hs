@@ -34,6 +34,9 @@ spec = do
   it "separa comandos sem terminador" $
     prog "x = 1 y = 2" `shouldBe` Right [SAssign "x" (EInt 1), SAssign "y" (EInt 2)]
 
+  it "aceita fim de linha do Windows" $
+    prog "x = 1\r\n# nota\r\nsegue\r\n" `shouldBe` Right [SAssign "x" (EInt 1), SContinue]
+
   it "lê se sem sinão" $
     prog "se x então segue cabousse" `shouldBe` Right [SIf x [SContinue] Nothing]
 
@@ -79,6 +82,26 @@ spec = do
 
   it "rejeita laço sem faça" $
     prog "enquanto x segue cabousse" `shouldSatisfy` isLeft
+
+  it "rejeita se sem então" $
+    prog "se x segue cabousse" `shouldSatisfy` isLeft
+
+  it "rejeita pracada sem em" $
+    prog "pracada item xs faça segue cabousse" `shouldSatisfy` isLeft
+
+  it "rejeita Ruma sem de" $
+    prog "Ruma Numero xs = []" `shouldSatisfy` isLeft
+
+  it "rejeita parâmetro sem nome e vírgula sobrando" $ do
+    prog "função f(Numero) -> Numero devolve 1 cabousse" `shouldSatisfy` isLeft
+    prog "função f(Numero a,) -> Numero devolve 1 cabousse" `shouldSatisfy` isLeft
+
+  it "rejeita chamada sem fechar parêntese" $
+    prog "espia(1" `shouldSatisfy` isLeft
+
+  it "rejeita sinão e cabousse sem bloco aberto" $ do
+    prog "sinão x = 1 cabousse" `shouldSatisfy` isLeft
+    prog "cabousse" `shouldSatisfy` isLeft
 
   it "aceita os programas de exemplo" $
     mapM_ (\f -> T.readFile f >>= \src -> parseProgram f src `shouldSatisfy` isRight)

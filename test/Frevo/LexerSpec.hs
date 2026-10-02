@@ -45,5 +45,16 @@ spec = do
   it "lê escape dentro de prosa" $
     expr "\"a\\n\\\"b\\\"\"" `shouldBe` Right (EStr "a\n\"b\"")
 
+  it "lê quebrado com expoente" $ do
+    expr "1e3" `shouldBe` Right (EFloat 1000)
+    expr "2.5e-1" `shouldBe` Right (EFloat 0.25)
+
   it "rejeita quebrado sem dígito depois do ponto" $
     expr "1." `shouldSatisfy` isLeft
+
+  it "rejeita número colado em letra" $ do
+    expr "2pac" `shouldSatisfy` isLeft
+    expr "1.5x" `shouldSatisfy` isLeft
+
+  it "rejeita prosa não fechada" $
+    expr "\"abc" `shouldSatisfy` isLeft
