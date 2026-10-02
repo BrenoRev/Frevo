@@ -71,6 +71,7 @@ Gramática: [docs/gramatica.ebnf](docs/gramatica.ebnf). Decisões e cortes: [doc
 | [docs/](docs/) | Gramática, especificação e o PDF do levantamento de vocabulário |
 | [.claude/rules/](.claude/rules/) | Padrões de código, linguagem, testes e git — **seguir sempre** |
 | [.claude/skills/revisar-pr/](.claude/skills/revisar-pr/SKILL.md) | `/revisar-pr <n>`: revisão de PR antes do merge |
+| [.claude/skills/guia-estudo/](.claude/skills/guia-estudo/SKILL.md) | `/guia-estudo`: gera `docs/guia-de-estudo.pdf`, o material de estudo para a arguição |
 | [.github/workflows/ci.yml](.github/workflows/ci.yml) | CI do PR: build com `-Werror`, testes, exemplos, hlint, padrão de commits |
 
 ```sh
