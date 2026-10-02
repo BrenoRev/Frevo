@@ -10,11 +10,15 @@ import Text.Megaparsec
 import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as L
 
+-- Número colado em letra ("2pac") é erro, não um número seguido de um nome.
+number :: Parser a -> Parser a
+number p = lexeme (p <* notFollowedBy identChar)
+
 pInteger :: Parser Expr
-pInteger = EInt <$> lexeme L.decimal
+pInteger = EInt <$> number L.decimal
 
 pFloat :: Parser Expr
-pFloat = EFloat <$> lexeme L.float
+pFloat = EFloat <$> number L.float
 
 pString :: Parser Expr
 pString = EStr <$> lexeme (char '"' *> manyTill L.charLiteral (char '"'))
