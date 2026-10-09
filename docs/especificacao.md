@@ -4,7 +4,7 @@
 
 | Questão | Decisão | Por quê |
 |---|---|---|
-| Propósito | Específico: ensino de programação para crianças | O vocabulário é o falar pernambucano que a criança já conhece; o nome da construção ensina o conceito. |
+| Propósito | Geral, pensada para o ensino de programação para crianças | Nenhuma construção é presa a um domínio: variáveis, condicional, laços, funções e listas servem a qualquer programa. O público motiva o vocabulário, que é o falar pernambucano que a criança já conhece, e não restringe o que dá para escrever. |
 | Paradigma | Imperativo | É o modelo de "faça isto, depois aquilo" que se ensina primeiro. O interpretador será um ambiente de variáveis mais um laço sobre comandos. |
 | Sistema de tipos | Estático, com anotação obrigatória | O erro aparece antes de rodar, com uma mensagem que o professor lê em sala. Custa um type checker; dispensa inferência. |
 | Inspiração sintática | Python | Sintaxe de superfície enxuta, comentário com `#`. Os blocos fecham com `cabousse` em vez de indentação, o que mantém a gramática livre de contexto. |

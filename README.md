@@ -14,14 +14,14 @@ Este documento registra **o que precisou ser feito** em cada marco. É um regist
 | Extensão de arquivo | `.frevo` |
 | Linguagem de implementação (host) | Haskell |
 | Estratégia de parsing | Parser combinators |
-| Propósito | Específico (DSL) |
+| Propósito | Geral |
 | Paradigma | Imperativo |
 | Sistema de tipos | Estático |
 | Inspiração sintática | Python |
 
 ## Objetivo da linguagem
 
-Frevo é uma linguagem de programação de propósito específico voltada ao **ensino de programação para crianças**, construída sobre o vocabulário e o modo de falar pernambucano.
+Frevo é uma linguagem de programação de propósito geral pensada para o **ensino de programação para crianças**, construída sobre o vocabulário e o modo de falar pernambucano.
 
 A proposta parte da constatação de que a barreira inicial no aprendizado de programação não é apenas conceitual, mas linguística: as palavras-chave, os nomes de tipo e as mensagens de erro das linguagens de uso corrente estão em inglês e assumem vocabulário técnico prévio. Frevo substitui essa camada por termos que a criança já domina antes de sentar no computador, de modo que o nome da construção ensine o conceito em vez de exigir que ele já seja conhecido.
 
@@ -68,7 +68,7 @@ Marco sem exigência de implementação. O produto é a especificação da lingu
 
 ### 1.1 Delimitação de propósito e público-alvo
 
-Caracterização do público (crianças em fase escolar), do contexto de uso (sala de aula, com o professor como usuário secundário) e do recorte de propósito específico contra propósito geral.
+Caracterização do público (crianças em fase escolar), do contexto de uso (sala de aula, com o professor como usuário secundário) e da escolha de propósito geral contra propósito específico.
 
 ### 1.2 Definição de paradigma e modelo de tipagem
 
