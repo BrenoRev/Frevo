@@ -23,7 +23,7 @@ A avaliação de cada entrega é **oral e individual**. Código que roda não ga
 | Nome / extensão | Frevo / `.frevo` |
 | Host | Haskell (Cabal; testado com GHC 9.10.3, a versão do CI) |
 | Estratégia de parsing | Parser combinators (Megaparsec + `parser-combinators`) |
-| Propósito | Específico (DSL): ensino de programação para crianças, com vocabulário pernambucano |
+| Propósito | Geral; pensada para o ensino de programação para crianças, com vocabulário pernambucano |
 | Paradigma | Imperativo |
 | Sistema de tipos | Estático |
 | Inspiração sintática | Python (superfície), blocos fechados por `cabousse` |

@@ -30,6 +30,9 @@ spec = do
     erro "Numero se = 1" `shouldStartWith` "t:1:8:"
     erro "Numero se = 1" `shouldContain` "palavra reservada"
 
+  it "identificador com _ não vira comando segue" $
+    erro "se x então segue_ cabousse" `shouldStartWith` "t:1:19:"
+
   it "erro em linha do meio do arquivo reporta a linha certa" $
     erro "x = 1\ny = 2\nz = = 3\n" `shouldStartWith` "t:3:5:"
 
