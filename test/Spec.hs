@@ -11,4 +11,4 @@ main = hspec $ do
   describe "expressões" Frevo.ExprSpec.spec
   describe "comandos" Frevo.StmtSpec.spec
   describe "erros e casos de borda" Frevo.ErroSpec.spec
-  descrbie "erros do verificador de tipos" Frevo.TypeSpec.spec
+  describe "ambiente de tipos" Frevo.TypeSpec.spec

@@ -20,7 +20,10 @@ library
     exposed-modules:  Frevo.AST
                       Frevo.Lexer
                       Frevo.Parser
-    build-depends:    parser-combinators
+                      Frevo.TypeEnv
+    build-depends:    parser-combinators,
+                      containers,
+                      mtl
 
 executable Frevo
     import:           shared
@@ -37,5 +40,8 @@ test-suite spec
                       Frevo.ExprSpec
                       Frevo.StmtSpec
                       Frevo.ErroSpec
+                      Frevo.TypeSpec
     build-depends:    Frevo,
-                      hspec
+                      hspec,
+                      mtl,
+                      containers
