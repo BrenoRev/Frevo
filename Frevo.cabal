@@ -42,6 +42,7 @@ test-suite spec
                       Frevo.StmtSpec
                       Frevo.ErroSpec
                       Frevo.TypeSpec
+                      Frevo.InferSpec
     build-depends:    Frevo,
                       hspec,
                       mtl,
