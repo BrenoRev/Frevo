@@ -7,7 +7,7 @@
 | Propósito | Geral, pensada para o ensino de programação para crianças | Nenhuma construção é presa a um domínio: variáveis, condicional, laços, funções e listas servem a qualquer programa. O público motiva o vocabulário, que é o falar pernambucano que a criança já conhece, e não restringe o que dá para escrever. |
 | Paradigma | Imperativo | É o modelo de "faça isto, depois aquilo" que se ensina primeiro. O interpretador será um ambiente de variáveis mais um laço sobre comandos. |
 | Sistema de tipos | Estático, com anotação obrigatória | O erro aparece antes de rodar, com uma mensagem que o professor lê em sala. Custa um type checker; dispensa inferência. |
-| Inspiração sintática | Python | Sintaxe de superfície enxuta, comentário com `#`. Os blocos fecham com `cabousse` em vez de indentação, o que mantém a gramática livre de contexto. Variáveis também podem ser redeclaradas no mesmo escopo |
+| Inspiração sintática | Python | Sintaxe de superfície enxuta, comentário com `#`. Os blocos fecham com `cabousse` em vez de indentação, o que mantém a gramática livre de contexto. |
 
 ## Tipos
 
@@ -37,7 +37,7 @@ Lista fechada:
 
 Lista fechada:
 
-1. Declaração: `Numero x = 0`.
+1. Declaração: `Numero x = 0`. Pode repetir o nome de uma variável do mesmo escopo: a nova declaração substitui a anterior, inclusive o tipo.
 2. Atribuição: `x = x + 1`.
 3. Chamada de função: `espia(x)`.
 4. Condicional: `se … então … sinão … cabousse`.

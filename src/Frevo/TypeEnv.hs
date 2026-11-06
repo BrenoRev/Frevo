@@ -6,25 +6,25 @@ import qualified Data.Map as M
 
 import Frevo.AST
 
-data Env = Env 
+data Env = Env
   { varEnv  :: M.Map String Type
-  , funEnv  :: M.Map String ([Type], Type) 
+  , funEnv  :: M.Map String ([Type], Type)
   , retType :: Maybe Type
-  , inLoop :: Bool                
+  , inLoop :: Bool
   } deriving (Show, Eq)
 
 emptyEnv :: Env
 emptyEnv = Env M.empty M.empty Nothing False
 
-data TypeError = 
-    TypeMisMatch Type Type
+data TypeError =
+    TypeMismatch Type Type
     | InvalidOp Op Type Type
     | UndefinedVar String
     | UndefinedFun String
     | DuplicateFun String
     | ArityMismatch String Int Int
     | ArrayHeterogeneousType Type Type
-    | NoIterable Type 
+    | NoIterable Type
     | BreakOutsideLoop
     | ContinueOutsideLoop
     | ReturnOutsideFunction
@@ -34,11 +34,11 @@ type TC a = ReaderT Env (Except TypeError) a
 runTC :: TC a -> Env -> Either TypeError a
 runTC checker env = runExcept (runReaderT checker env)
 
-expect :: Type -> Type -> TC()
+expect :: Type -> Type -> TC ()
 expect expected found =
-  if expected == found 
+  if expected == found
   then return ()
-  else throwError $ TypeMisMatch expected found
+  else throwError $ TypeMismatch expected found
 
 -- local desfaz a inserção ao sair do bloco: é isso que dá o escopo léxico.
 withVar :: String -> Type -> TC a -> TC a

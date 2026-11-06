@@ -26,7 +26,7 @@ spec = do
 
     it "retorna erro com tipo esperado e encontrado" $
       runTC (expect TBool TInt) emptyEnv
-        `shouldBe` Left (TypeMisMatch TBool TInt)
+        `shouldBe` Left (TypeMismatch TBool TInt)
 
   describe "escopo de variáveis" $ do
     it "expõe a variável dentro do escopo e a remove ao sair" $ do
