@@ -37,7 +37,7 @@ Lista fechada:
 
 Lista fechada:
 
-1. Declaração: `Numero x = 0`.
+1. Declaração: `Numero x = 0`. Pode repetir o nome de uma variável do mesmo escopo: a nova declaração substitui a anterior, inclusive o tipo.
 2. Atribuição: `x = x + 1`.
 3. Chamada de função: `espia(x)`.
 4. Condicional: `se … então … sinão … cabousse`.
