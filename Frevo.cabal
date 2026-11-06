@@ -21,6 +21,7 @@ library
                       Frevo.Lexer
                       Frevo.Parser
                       Frevo.TypeEnv
+                      Frevo.Infer
     build-depends:    parser-combinators,
                       containers,
                       mtl
@@ -41,6 +42,7 @@ test-suite spec
                       Frevo.StmtSpec
                       Frevo.ErroSpec
                       Frevo.TypeSpec
+                      Frevo.InferSpec
     build-depends:    Frevo,
                       hspec,
                       mtl,
