@@ -85,7 +85,7 @@ Gramática: [docs/gramatica.ebnf](docs/gramatica.ebnf). Decisões e cortes: [doc
 | [scripts/verificar.sh](scripts/verificar.sh) | Tudo o que o CI roda, em um comando |
 | [docs/procedimentos/](docs/procedimentos/) | Passo a passo para revisar um PR e para gerar o guia de estudo (PDF gerado, que não se commita) |
 | [.claude/](.claude/), [CLAUDE.md](CLAUDE.md) | Atalhos do Claude Code para os arquivos acima; não têm conteúdo próprio |
-| [.github/workflows/ci.yml](.github/workflows/ci.yml) | CI do PR: build com `-Werror`, testes, exemplos, hlint, padrão de commits |
+| [.github/workflows/ci.yml](.github/workflows/ci.yml) | CI do PR: build com `-Werror`, testes, exemplos, hlint |
 
 ```sh
 scripts/verificar.sh                          # build -Werror, testes, exemplos, hlint
