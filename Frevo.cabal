@@ -21,6 +21,7 @@ library
                       Frevo.Lexer
                       Frevo.Parser
                       Frevo.TypeEnv
+                      Frevo.Infer
     build-depends:    parser-combinators,
                       containers,
                       mtl

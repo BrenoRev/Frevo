@@ -19,11 +19,14 @@ emptyEnv = Env M.empty M.empty Nothing False
 data TypeError =
     TypeMismatch Type Type
     | InvalidOp Op Type Type
+    | InvalidUnaryOp Op Type
     | UndefinedVar String
     | UndefinedFun String
     | DuplicateFun String
     | ArityMismatch String Int Int
     | ArrayHeterogeneousType Type Type
+    | EmptyList
+    | VoidListElement
     | NoIterable Type
     | BreakOutsideLoop
     | ContinueOutsideLoop
