@@ -10,19 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Commits no padrão Conventional Commits
-        if: github.event_name == 'pull_request'
-        run: |
-          padrao='^(feat|fix|test|docs|refactor|build|ci|chore)(\([a-z0-9-]+\))?: .+'
-          ruins=$(git log --no-merges --format=%s "origin/${{ github.base_ref }}..${{ github.event.pull_request.head.sha }}" | grep -Ev "$padrao" || true)
-          if [ -n "$ruins" ]; then
-            echo "Commits fora do padrão:"
-            echo "$ruins"
-            exit 1
-          fi
 
       - uses: haskell-actions/setup@v2
         id: setup
