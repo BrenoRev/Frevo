@@ -35,12 +35,19 @@ Requer GHC e Cabal, instalados pelo [GHCup](https://www.haskell.org/ghcup/). Tes
 
 ```sh
 cabal build all                                  # compila
-cabal run Frevo -- examples/03_feira.frevo       # imprime a AST do programa
+cabal run Frevo -- examples/03_feira.frevo       # checa os tipos e executa o programa
+cabal run Frevo -- --ast examples/03_feira.frevo # só imprime a AST
 cabal test                                       # roda a suíte de testes
 scripts/verificar.sh                             # tudo o que o CI roda: build, testes, exemplos e lint
 ```
 
-Em erro de sintaxe, o programa mostra linha, coluna e o trecho do código, e sai com código 1.
+O programa passa por três etapas, nesta ordem: parser, checagem de tipos e execução. Um erro em qualquer uma delas mostra linha e coluna (TAB conta como 8 colunas) e sai com código 1, e nada do programa roda se a sintaxe ou os tipos estiverem errados. Arquivo que não existe ou que não está em UTF-8 também sai com código 1, com uma mensagem própria.
+
+| Etapa | Cabeçalho do erro | Exemplo |
+|---|---|---|
+| Sintaxe | `Oxe, num entendi essa parte:` | `cabousse` faltando |
+| Tipos | `Vixe, os tipos num batem:` | `linha 2, coluna 1: era pra ser Numero, mas veio Prosa` |
+| Execução | `Eita, deu ruim rodando o programa:` | `linha 2, coluna 1: divisão por zero` |
 
 ## Trabalhando com assistentes de IA
 
@@ -59,6 +66,25 @@ O contexto do projeto para qualquer assistente (Claude Code, Codex, Cursor, Copi
 | Erros | Mensagem do Megaparsec com linha e coluna | Camada própria de mensagens: mais código sem exigência do enunciado |
 
 A gramática está em [docs/gramatica.ebnf](docs/gramatica.ebnf) e a especificação em [docs/especificacao.md](docs/especificacao.md).
+
+## Decisões da Entrega 3
+
+| Decisão | Escolha | Alternativa descartada |
+|---|---|---|
+| Inferência | Nenhuma: tudo é anotado; checagem dirigida pela sintaxe, de baixo para cima, numa passada | Hindley-Milner: teoria e código demais para uma linguagem sem polimorfismo |
+| Lista vazia `[]` | Modo de verificação `Γ ⊢ e ⇐ τ`, só para ela (bidirecional mínimo) | Tipo "lista de qualquer coisa": exigiria subtipagem ou unificação |
+| Ambiente Γ | `ReaderT Env (Except TypeError)`; `local` dá o escopo léxico | Estado mutável: teria de desfazer cada declaração na saída do bloco |
+| `espia` e `quantoTem` | Casos embutidos no type checker | Polimorfismo na linguagem: fora da primeira versão |
+| Corpo de função | Enxerga só os parâmetros; a função vale da definição em diante | Enxergar as globais: aceitaria programa que trava (ver `docs/tipos.md`) |
+| Todo caminho devolve | Análise conservadora (laço não conta) | Análise exata: exigiria decidir se o laço termina |
+| Posição dos erros | Em cada comando (`SAt`), anexada pelo parser | Posição em cada expressão: mexeria em todos os construtores da AST |
+| Semântica | Big-step, com resultado `normal / poparrar / segue / devolve v` | Small-step: precisaria de contextos ou continuações; exceção do Haskell: esconde o fluxo |
+| Ambiente de execução | Pilha de escopos em `StateT`, separada de Γ | Um mapa só: a declaração dentro do bloco não sumiria no `cabousse` |
+| `Numero` | Inteiro sem limite (`Integer`), como o `int` do Python | `Int` de 64 bits: o literal e a conta davam a volta sem aviso |
+| Divisão por zero | Erro de execução em `Numero` e em `Quebrado` | `Infinity` em `Quebrado`: ensina menos que a mensagem |
+| `e` / `ou` | Curto-circuito | Avaliar os dois lados: `x == 0 ou 10 / x > 1` quebraria |
+
+As regras de tipagem estão em [docs/tipos.md](docs/tipos.md) e a semântica operacional em [docs/semantica.md](docs/semantica.md).
 
 ---
 
@@ -218,6 +244,56 @@ Leitura cruzada do código entre os integrantes, de modo que cada um consiga exp
 
 ---
 
+## Entrega 3: Sistema de tipos e interpretador
+
+Marco de implementação. O produto é o type checker, o interpretador, a documentação formal de ambos e os testes.
+
+### 3.1 Divisão do trabalho
+
+Separação do type checker em módulos com dono: ambiente e erros (`TypeEnv.hs`), expressões (`Infer.hs`), comandos e escopos (`Statement.hs`), e integração, stdlib, funções e programa inteiro (`TypeChecker.hs`).
+
+### 3.2 Posição de origem na AST
+
+Decisão de onde guardar linha e coluna para os erros de tipo e de execução, e alteração do parser e dos testes de AST para carregá-las.
+
+### 3.3 Ambiente de tipos e erros
+
+Definição de Γ (variáveis, funções, tipo de retorno e se se está dentro de um laço), da mônada de checagem e de um construtor de erro por regra violada.
+
+### 3.4 Regras de tipagem de expressões e de comandos
+
+Implementação das regras de cada construção, do escopo léxico com sombreamento, das funções (assinatura, escopo do corpo, retorno em todo caminho) e da stdlib.
+
+### 3.5 Mensagens de erro
+
+Tradução de cada erro de tipo e de execução para uma mensagem em português, com linha, coluna e tipo esperado × encontrado.
+
+### 3.6 Documentação formal dos tipos
+
+Regras em notação de julgamentos (`Γ ⊢ e : τ`) para todas as construções, com a correspondência para o código e a discussão de soundness, em `docs/tipos.md`.
+
+### 3.7 Interpretador
+
+Avaliação sobre a AST com ambiente de execução separado do ambiente de tipos, desvio de fluxo (`poparrar`, `segue`, `devolve`), stdlib e erros de execução.
+
+### 3.8 Documentação formal da semântica
+
+Semântica operacional big-step, com a justificativa da escolha e a tabela regra ↔ código, em `docs/semantica.md`.
+
+### 3.9 Integração no executável
+
+Ligação parser → checagem → execução no executável, que só roda o programa depois que ele passa na checagem inteira.
+
+### 3.10 Testes
+
+Testes de aceitação e de rejeição da checagem, com posição; testes de cada construção no interpretador, com entrada e saída simuladas; erros de execução; e a saída exata dos três programas de exemplo.
+
+### 3.11 Verificação final contra a checklist
+
+Passagem explícita por cada item da checklist do marco.
+
+---
+
 ## Artefatos por marco
 
 | Marco | Artefato | Local |
@@ -230,6 +306,10 @@ Leitura cruzada do código entre os integrantes, de modo que cada um consiga exp
 | Entrega 2 | Executável de linha de comando | `app/` |
 | Entrega 2 | Suíte de testes | `test/` |
 | Entrega 2 | Instruções de build, execução e teste | `README.md` |
+| Entrega 3 | Regras de tipagem e soundness | `docs/tipos.md` |
+| Entrega 3 | Semântica operacional | `docs/semantica.md` |
+| Entrega 3 | Type checker e interpretador | `src/` |
+| Entrega 3 | Testes da checagem e do interpretador | `test/` |
 
 ## Convenções de trabalho no repositório
 

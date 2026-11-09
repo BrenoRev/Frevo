@@ -16,6 +16,20 @@ data Env = Env
 emptyEnv :: Env
 emptyEnv = Env M.empty M.empty Nothing False
 
+-- pergunta e encanga têm assinatura fixa e entram em Γ como função comum.
+stdlibEnv :: Env
+stdlibEnv = emptyEnv
+  { funEnv = M.fromList
+      [ ("pergunta", ([TStr], TStr))
+      , ("encanga", ([TStr, TStr], TStr))
+      ]
+  }
+
+-- Aceitam mais de um tipo e a linguagem não tem polimorfismo: Infer trata
+-- cada uma como caso à parte.
+polymorphicBuiltins :: [String]
+polymorphicBuiltins = ["espia", "quantoTem"]
+
 data TypeError =
     TypeMismatch Type Type
     | InvalidOp Op Type Type
@@ -32,6 +46,12 @@ data TypeError =
     | BreakOutsideLoop
     | ContinueOutsideLoop
     | ReturnOutsideFunction
+    | DuplicateParam String String
+    | MissingReturn String
+    | InvalidArg String Type
+    | ArgMismatch String Int Type Type
+    | VoidReturn
+    | TypeAt Pos TypeError
     deriving (Show, Eq)
 
 type TC a = ReaderT Env (Except TypeError) a
@@ -43,6 +63,13 @@ expect expected found =
   if expected == found
   then return ()
   else throwError $ TypeMismatch expected found
+
+-- Só marca o erro que ainda não tem posição: vale a do comando mais interno.
+atPos :: Pos -> TC a -> TC a
+atPos pos checker = catchError checker (throwError . locate)
+  where
+    locate err@(TypeAt _ _) = err
+    locate err = TypeAt pos err
 
 -- local desfaz a inserção ao sair do bloco: é isso que dá o escopo léxico.
 withVar :: String -> Type -> TC a -> TC a
@@ -59,8 +86,9 @@ withFun name params ret = local (\e -> e { funEnv = M.insert name (params, ret) 
 
 -- O corpo só enxerga os parâmetros: uma global pode ser redeclarada com outro
 -- tipo depois da definição, e o corpo teria sido checado com o tipo antigo.
+-- inLoop volta a False para poparrar no corpo nunca sair por um laço de fora.
 withFunScope :: [(Type, String)] -> Type -> TC a -> TC a
 withFunScope params ret = local enterBody
   where
     paramVars = M.fromList [(name, ty) | (ty, name) <- params]
-    enterBody e = e { varEnv = paramVars, retType = Just ret }
+    enterBody e = e { varEnv = paramVars, retType = Just ret, inLoop = False }

@@ -1,5 +1,8 @@
 module Frevo.AST where
 
+-- Linha e coluna em que um comando começa.
+type Pos = (Int, Int)
+
 data Type = TInt | TFloat | TStr | TBool | TArray Type | TUnit
   deriving (Show, Eq)
 
@@ -7,7 +10,7 @@ data Op = Add | Sub | Mul | Div | Eq | Le | Ge | Lt | Gt | And | Or
   deriving (Show, Eq)
 
 data Expr
-  = EInt Int
+  = EInt Integer
   | EFloat Double
   | EStr String
   | EBool Bool
@@ -30,4 +33,7 @@ data Stmt
   | SBreak
   | SContinue
   | SFun String [(Type, String)] Type [Stmt]
+  -- O parser embrulha cada comando com a posição dele; quem monta a AST à mão
+  -- pode omitir.
+  | SAt Pos Stmt
   deriving (Show, Eq)

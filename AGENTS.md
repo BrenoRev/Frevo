@@ -74,13 +74,18 @@ Gramática: [docs/gramatica.ebnf](docs/gramatica.ebnf). Decisões e cortes: [doc
 | Caminho | Conteúdo |
 |---|---|
 | [Frevo.cabal](Frevo.cabal) | `library` (src), `executable Frevo` (app), `test-suite spec` (test) |
-| [src/Frevo/AST.hs](src/Frevo/AST.hs) | `Type`, `Op`, `Expr`, `Stmt`; o programa é `[Stmt]` |
+| [src/Frevo/AST.hs](src/Frevo/AST.hs) | `Type`, `Op`, `Expr`, `Stmt`; o programa é `[Stmt]`; `SAt` guarda a linha e a coluna de cada comando |
 | [src/Frevo/Lexer.hs](src/Frevo/Lexer.hs) | Camada léxica em Megaparsec: `sc`, `lexeme`, `symbol`, `rword`, `pIdentifier`, `reservedKeywords` |
 | [src/Frevo/Parser.hs](src/Frevo/Parser.hs) | Expressões (`makeExprParser` + `operatorTable`), comandos, `pFun`, `parseProgram` |
-| [app/Main.hs](app/Main.hs) | CLI: imprime a AST, ou o erro com linha e coluna e código de saída 1 |
-| [test/](test/) | hspec: `LexerSpec`, `ExprSpec`, `StmtSpec`, `ErroSpec` |
+| [src/Frevo/TypeEnv.hs](src/Frevo/TypeEnv.hs) | Ambiente de tipos Γ (`Env`), `TypeError`, mônada `TC`, `stdlibEnv`, `atPos` |
+| [src/Frevo/Infer.hs](src/Frevo/Infer.hs) | `infer` (Γ ⊢ e : τ) e `check` (Γ ⊢ e ⇐ τ), operadores, listas, chamadas e stdlib |
+| [src/Frevo/Statement.hs](src/Frevo/Statement.hs) | `checkBlock`: comandos, escopos, laços, funções e `alwaysReturns` |
+| [src/Frevo/TypeChecker.hs](src/Frevo/TypeChecker.hs) | `typecheckProgram` e as mensagens de erro de tipo em português |
+| [src/Frevo/Interpreter.hs](src/Frevo/Interpreter.hs) | Interpretador big-step: `eval`, `exec`, pilha de escopos, stdlib, erros de execução |
+| [app/Main.hs](app/Main.hs) | CLI: parser → checagem → execução; `--ast` só imprime a AST; erro com linha e coluna e código de saída 1 |
+| [test/](test/) | hspec: `LexerSpec`, `ExprSpec`, `StmtSpec`, `ErroSpec` (parser); `TypeSpec`, `InferSpec`, `StatementSpec`, `TypeCheckerSpec` (tipos); `InterpreterSpec` |
 | [examples/](examples/) | `01_bom_dia`, `02_passos`, `03_feira` — juntos usam toda a linguagem |
-| [docs/](docs/) | Gramática, especificação e o PDF do levantamento de vocabulário |
+| [docs/](docs/) | Gramática, especificação, regras de tipagem (`tipos.md`), semântica operacional (`semantica.md`) e o PDF do levantamento de vocabulário |
 | [docs/regras/](docs/regras/) | Padrões de código, linguagem, testes, git e a definição de pronto — **seguir sempre** |
 | [scripts/verificar.sh](scripts/verificar.sh) | Tudo o que o CI roda, em um comando |
 | [docs/procedimentos/](docs/procedimentos/) | Passo a passo para revisar um PR e para gerar o guia de estudo (PDF gerado, que não se commita) |
@@ -89,21 +94,22 @@ Gramática: [docs/gramatica.ebnf](docs/gramatica.ebnf). Decisões e cortes: [doc
 
 ```sh
 scripts/verificar.sh                          # build -Werror, testes, exemplos, hlint
-cabal run Frevo -- examples/03_feira.frevo
+cabal run Frevo -- examples/03_feira.frevo        # checa e executa
+cabal run Frevo -- --ast examples/03_feira.frevo  # só a AST
 ```
 
 ## 4. Estado atual e por onde seguir
 
-**Entregas 1 e 2 implementadas** na branch `feat/entrega-2`: gramática, parser e suíte de testes prontos, build e testes verdes.
+**Entregas 1, 2 e 3 implementadas.** A Entrega 3 está na branch `feat/entrega-3-final`: type checker com posição nos erros, interpretador big-step, stdlib, regras de tipagem em [docs/tipos.md](docs/tipos.md) e semântica em [docs/semantica.md](docs/semantica.md).
 
-Falta, fora do código: slides da Entrega 1 e a preparação de cada integrante para a arguição (todos precisam saber explicar `Lexer.hs`, `Parser.hs` e a gramática).
+Falta, fora do código: slides da Entrega 1 e a preparação de cada integrante para a arguição. Todos precisam saber explicar o parser, as regras de tipagem com o argumento de soundness de cada uma, e a correspondência entre regra big-step e código.
 
-**Próxima: Entrega 3 (sistema de tipos e interpretador).** Pontos de partida já conhecidos:
+**Próxima: Entrega 4 (TAC, otimização e geração de código).** Pontos de partida já conhecidos:
 
-1. A AST não guarda posição de origem. O erro de tipo precisa de linha e coluna, então o primeiro passo é decidir onde guardar a posição (o mais simples: nos comandos).
-2. `espia` e `quantoTem` aceitam mais de um tipo; o type checker vai tratá-las como casos embutidos, já que a linguagem não tem polimorfismo.
-3. A lista vazia `[]` só tem tipo pela declaração (`Ruma de Numero xs = []`).
-4. A linguagem não tem indexação, então "índice fora de faixa" não existe; o erro de execução a tratar é a divisão por zero.
+1. `e` e `ou` têm curto-circuito na semântica, então a tradução para TAC precisa de saltos condicionais, não de uma instrução booleana.
+2. O corpo de função enxerga só os parâmetros, então cada função vira uma unidade TAC independente, sem variáveis livres.
+3. `Numero` é inteiro sem limite; a linguagem alvo pode não ter isso, e a diferença precisa ser documentada.
+4. `pracada` avalia a ruma uma vez, antes da primeira volta; a tradução precisa preservar isso (um temporário para a ruma e outro para o índice).
 
 ## 5. Entregas e checklists
 
@@ -153,15 +159,15 @@ Frevo só tem comentário de linha, então "comentário não fechado" não se ap
 
 > **Enunciado:** Implementação do sistema de tipos e do interpretador para a linguagem.
 
-- [ ] Regras de tipagem em notação de julgamentos (`Γ ⊢ e : τ`) para todas as construções, em documento próprio em `docs/`
-- [ ] Ambiente de tipos Γ com escopo léxico correto (aninhamento, sombreamento)
-- [ ] Type checker implementado; se houver inferência, algoritmo nomeado e justificado
-- [ ] Erros de tipo com posição e tipo esperado × encontrado
-- [ ] Semântica operacional documentada (small-step ou big-step, justificado), com correspondência regra ↔ código do interpretador
-- [ ] Interpretador sobre a AST, com ambiente de execução separado do ambiente de tipos
-- [ ] Erros de execução (divisão por zero) tratados e distintos dos erros de tipo
-- [ ] Testes de rejeição: programa mal tipado falha na checagem, não na execução
-- [ ] Stdlib mínima conforme a fronteira da Entrega 1
+- [x] Regras de tipagem em notação de julgamentos (`Γ ⊢ e : τ`) para todas as construções, em documento próprio em `docs/`
+- [x] Ambiente de tipos Γ com escopo léxico correto (aninhamento, sombreamento)
+- [x] Type checker implementado; se houver inferência, algoritmo nomeado e justificado
+- [x] Erros de tipo com posição e tipo esperado × encontrado
+- [x] Semântica operacional documentada (small-step ou big-step, justificado), com correspondência regra ↔ código do interpretador
+- [x] Interpretador sobre a AST, com ambiente de execução separado do ambiente de tipos
+- [x] Erros de execução (divisão por zero) tratados e distintos dos erros de tipo
+- [x] Testes de rejeição: programa mal tipado falha na checagem, não na execução
+- [x] Stdlib mínima conforme a fronteira da Entrega 1
 - [ ] Cada integrante explica por que uma regra é *sound* (ou onde não é)
 
 ### Entrega 4 — Geração de código e otimização

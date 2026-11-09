@@ -47,16 +47,33 @@ Lista fechada:
 8. Definição de função: `função f(Numero x) -> Numero … cabousse`, só no nível de topo. A função vale da definição em diante e dentro do próprio corpo (recursão); o corpo só enxerga os parâmetros. Duas funções com o mesmo nome são erro.
 9. Retorno: `devolve e`.
 
+## Execução
+
+As regras formais estão em [tipos.md](tipos.md) e [semantica.md](semantica.md). As decisões que uma criança percebe ao rodar um programa:
+
+| Questão | Decisão |
+|---|---|
+| Ordem | O programa inteiro é checado antes de rodar. Com erro de tipo, nenhuma linha executa. |
+| `Numero` | Inteiro sem limite de tamanho. |
+| `/` | Em `Numero`, arredonda para baixo (`7 / 2` é 3, `-7 / 2` é -4); em `Quebrado`, divisão real. Divisão por zero é erro nos dois. |
+| Misturar `Numero` e `Quebrado` | Erro de tipo: `1 + 2.5` não é aceito. |
+| `e`, `ou` | O lado direito só é avaliado se o esquerdo não decidir o resultado. |
+| Escopo | Declaração dentro de `se`, `enquanto`, `pracada` ou função vale até o `cabousse`; atribuição muda a variável de fora. Declarar de novo o mesmo nome é permitido e esconde o anterior. |
+| Função | Vale da definição para baixo (e dentro dela mesma, para recursão). O corpo enxerga só os parâmetros. Se não é `Nadica`, todo caminho termina em `devolve`; se é `Nadica`, não usa `devolve` e termina no `cabousse`. |
+| `pracada` | A ruma é lida uma vez, antes da primeira volta. |
+
 ## Núcleo e biblioteca padrão
 
 Entra no núcleo o que precisa de sintaxe própria ou muda o fluxo de execução. Todo o resto é função comum: não reserva palavra, não aumenta a gramática e pode crescer sem mexer no parser.
 
 | Função | O que faz |
 |---|---|
-| `espia(x)` | Escreve um valor na tela. |
-| `pergunta(texto)` | Mostra o texto e lê uma `Prosa` do teclado. |
+| `espia(x)` | Escreve um valor de qualquer tipo na tela e pula a linha. |
+| `pergunta(texto)` | Mostra o texto e lê uma linha do teclado como `Prosa`. Sem entrada, é erro de execução. |
 | `encanga(a, b)` | Junta duas `Prosa`. |
-| `quantoTem(xs)` | Tamanho de uma `Ruma` ou de uma `Prosa`. |
+| `quantoTem(xs)` | Tamanho de uma `Ruma` (itens) ou de uma `Prosa` (caracteres Unicode: `"ação"` tem 4). |
+
+Nenhuma dessas é palavra reservada, mas os quatro nomes não podem ser usados para uma função do programa.
 
 ## O que ficou de fora
 

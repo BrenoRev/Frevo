@@ -10,8 +10,17 @@ import Frevo.Parser
 import Test.Hspec
 import Text.Megaparsec (ParseErrorBundle)
 
+-- Compara só a estrutura; as posições têm teste próprio.
 prog :: Text -> Either (ParseErrorBundle Text Void) [Stmt]
-prog = parseProgram "t"
+prog = fmap (map withoutPos) . parseProgram "t"
+
+withoutPos :: Stmt -> Stmt
+withoutPos (SAt _ stmt) = withoutPos stmt
+withoutPos (SIf cond thenBody elseBody) = SIf cond (map withoutPos thenBody) (map withoutPos <$> elseBody)
+withoutPos (SWhile cond body) = SWhile cond (map withoutPos body)
+withoutPos (SFor var iterable body) = SFor var iterable (map withoutPos body)
+withoutPos (SFun name params ret body) = SFun name params ret (map withoutPos body)
+withoutPos stmt = stmt
 
 x :: Expr
 x = EVar "x"
@@ -102,6 +111,14 @@ spec = do
   it "rejeita sinão e cabousse sem bloco aberto" $ do
     prog "sinão x = 1 cabousse" `shouldSatisfy` isLeft
     prog "cabousse" `shouldSatisfy` isLeft
+
+  it "guarda linha e coluna de cada comando, inclusive dentro de bloco" $
+    parseProgram "t" "função f() -> Nadica\r\n  segue\r\ncabousse\nProsa ação = \"x\" espia(ação)"
+      `shouldBe` Right
+        [ SAt (1, 1) (SFun "f" [] TUnit [SAt (2, 3) SContinue])
+        , SAt (4, 1) (SDecl TStr "ação" (EStr "x"))
+        , SAt (4, 18) (SCall "espia" [EVar "ação"])
+        ]
 
   it "aceita os programas de exemplo" $
     mapM_ (\f -> T.readFile f >>= \src -> parseProgram f src `shouldSatisfy` isRight)

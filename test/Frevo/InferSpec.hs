@@ -199,7 +199,7 @@ spec = do
       inferExpr (ECall "soma" [EInt 1]) `shouldBe` Left (ArityMismatch "soma" 2 1)
 
     it "rejeita chamada com argumento de tipo incompatível" $
-      inferExpr (ECall "soma" [EInt 1, EFloat 2.0]) `shouldBe` Left (TypeMismatch TInt TFloat)
+      inferExpr (ECall "soma" [EInt 1, EFloat 2.0]) `shouldBe` Left (ArgMismatch "soma" 2 TInt TFloat)
 
     it "prioriza erro de aridade quando aridade e tipo do argumento falham juntos" $
       inferExpr (ECall "soma" [EFloat 1.5]) `shouldBe` Left (ArityMismatch "soma" 2 1)
