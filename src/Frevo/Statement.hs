@@ -13,19 +13,19 @@ checkBlock :: [Stmt] -> TC ()
 checkBlock [] = return ()
 
 -- Usa 'check' (e não 'infer') para que listas vazias herdem o tipo esperado.
-checkBlock (SDecl tipo nome expr : stmts) = do
-  check expr tipo
-  withVar nome tipo (checkBlock stmts)
+checkBlock (SDecl ty name expr : stmts) = do
+  check expr ty
+  withVar name ty (checkBlock stmts)
 
-checkBlock (SAssign nome expr : stmts) = do
-  tVar <- infer (EVar nome)
+checkBlock (SAssign name expr : stmts) = do
+  tVar <- infer (EVar name)
   check expr tVar
   checkBlock stmts
 
 checkBlock (SIf cond thenBody maybeElseBody : stmts) = do
   check cond TBool
   checkBlock thenBody
-  maybe (return ()) checkBlock maybeElseBody
+  mapM_ checkBlock maybeElseBody
   checkBlock stmts
 
 checkBlock (SWhile cond body : stmts) = do
@@ -52,8 +52,8 @@ checkBlock (SContinue : stmts) = do
     then checkBlock stmts
     else throwError ContinueOutsideLoop
 
-checkBlock (SCall nome args : stmts) = do
-  _ <- infer (ECall nome args)
+checkBlock (SCall name args : stmts) = do
+  _ <- infer (ECall name args)
   checkBlock stmts
 
 checkBlock (SReturn expr : stmts) = do
@@ -64,6 +64,5 @@ checkBlock (SReturn expr : stmts) = do
       check expr expectedRet
       checkBlock stmts
 
-checkBlock (SFun _ _ _ _ : stmts) =
+checkBlock (SFun {} : stmts) =
   checkBlock stmts
-  
