@@ -10,11 +10,11 @@ import Frevo.TypeEnv
 -- Lista vazia não sintetiza o tipo dos elementos sozinha; é verificada
 -- quando o contexto já informa o Ruma de T esperado.
 check :: Expr -> Type -> TC ()
-check (EList []) (TArray elemType)
-  | isValueType elemType = return ()
 check (EList elems) (TArray elemType)
   | isValueType elemType && all isEmptyList elems =
       mapM_ (`check` elemType) elems
+check expr expected
+  | isEmptyList expr = throwError (EmptyListMismatch expected)
 check expr expected = do
   found <- infer expr
   expect expected found

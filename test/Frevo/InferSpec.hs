@@ -171,6 +171,20 @@ spec = do
     it "rejeita lista com elemento Nadica" $
       inferExpr (EList [ECall "avisa" []]) `shouldBe` Left VoidListElement
 
+    it "rejeita elemento Nadica mesmo depois de uma lista vazia" $
+      inferExpr (EList [EList [], ECall "avisa" []]) `shouldBe` Left VoidListElement
+
+    it "rejeita lista vazia onde o tipo esperado não é Ruma" $ do
+      checkExpr (EList []) TInt `shouldBe` Left (EmptyListMismatch TInt)
+      inferExpr (EBinOp Eq (EInt 1) (EList [])) `shouldBe` Left (EmptyListMismatch TInt)
+
+    it "rejeita lista vazia misturada com elementos que não são Ruma" $
+      inferExpr (EList [EInt 1, EList []]) `shouldBe` Left (EmptyListMismatch TInt)
+
+    it "rejeita lista vazia aninhada mais fundo que o tipo esperado" $ do
+      inferExpr (EBinOp Eq (EVar "notas") (EList [EList []])) `shouldBe` Left (EmptyListMismatch TInt)
+      inferExpr (ECall "somaLista" [EList [EList []]]) `shouldBe` Left (EmptyListMismatch TInt)
+
     it "infere o tipo de retorno na chamada de função" $ do
       inferExpr (ECall "soma" [EInt 1, EInt 2]) `shouldBe` Right TInt
       inferExpr (ECall "encanga" [EStr "oi, ", EVar "nome"]) `shouldBe` Right TStr

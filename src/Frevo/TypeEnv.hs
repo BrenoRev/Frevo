@@ -26,6 +26,7 @@ data TypeError =
     | ArityMismatch String Int Int
     | ArrayHeterogeneousType Type Type
     | EmptyList
+    | EmptyListMismatch Type
     | VoidListElement
     | NoIterable Type
     | BreakOutsideLoop
