@@ -2,8 +2,10 @@ module Frevo.Statement
   ( checkBlock
   ) where
 
+import Control.Monad (when)
 import Control.Monad.Except (throwError)
 import Control.Monad.Reader (asks)
+import qualified Data.Map as M
 
 import Frevo.AST
 import Frevo.Infer (check, infer)
@@ -64,5 +66,11 @@ checkBlock (SReturn expr : stmts) = do
       check expr expectedRet
       checkBlock stmts
 
-checkBlock (SFun {} : stmts) =
-  checkBlock stmts
+-- A função entra em Γ antes do corpo, para permitir recursão, e só vale
+-- dali em diante: é a ordem em que o interpretador vai executar o programa.
+checkBlock (SFun name params ret body : stmts) = do
+  funs <- asks funEnv
+  when (M.member name funs) $ throwError (DuplicateFun name)
+  withFun name (map fst params) ret $ do
+    withFunScope params ret (checkBlock body)
+    checkBlock stmts

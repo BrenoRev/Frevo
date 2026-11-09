@@ -44,7 +44,7 @@ Lista fechada:
 5. Laço condicional: `enquanto … faça … cabousse`.
 6. Laço sobre lista: `pracada x em xs faça … cabousse`.
 7. `poparrar` (sai do laço) e `segue` (próxima volta).
-8. Definição de função: `função f(Numero x) -> Numero … cabousse`, só no nível de topo.
+8. Definição de função: `função f(Numero x) -> Numero … cabousse`, só no nível de topo. A função vale da definição em diante e dentro do próprio corpo (recursão); o corpo só enxerga os parâmetros. Duas funções com o mesmo nome são erro.
 9. Retorno: `devolve e`.
 
 ## Núcleo e biblioteca padrão

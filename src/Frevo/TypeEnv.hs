@@ -53,3 +53,14 @@ withRetType returnType = local (\e -> e { retType = Just returnType })
 
 inLoopScope :: TC a -> TC a
 inLoopScope = local (\e -> e { inLoop = True })
+
+withFun :: String -> [Type] -> Type -> TC a -> TC a
+withFun name params ret = local (\e -> e { funEnv = M.insert name (params, ret) (funEnv e) })
+
+-- O corpo só enxerga os parâmetros: uma global pode ser redeclarada com outro
+-- tipo depois da definição, e o corpo teria sido checado com o tipo antigo.
+withFunScope :: [(Type, String)] -> Type -> TC a -> TC a
+withFunScope params ret = local enterBody
+  where
+    paramVars = M.fromList [(name, ty) | (ty, name) <- params]
+    enterBody e = e { varEnv = paramVars, retType = Just ret }

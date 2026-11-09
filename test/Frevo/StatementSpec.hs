@@ -199,3 +199,57 @@ spec = do
       let env = emptyEnv { funEnv = M.singleton "avisa" ([TFloat, TFloat], TUnit) }
       runTC (checkBlock [SCall "avisa" [EFloat 10.5]]) env
         `shouldBe` Left (ArityMismatch "avisa" 2 1)
+
+  describe "definição de função" $ do
+    it "aceita função com parâmetro no corpo e chamada depois da definição" $
+      checkStmts
+        [ SFun "dobro" [(TInt, "n")] TInt [SReturn (EBinOp Mul (EVar "n") (EInt 2))]
+        , SDecl TInt "x" (ECall "dobro" [EInt 21])
+        ]
+        `shouldBe` Right ()
+
+    it "rejeita corpo de função mal tipado" $
+      checkStmts [SFun "f" [] TInt [SDecl TStr "s" (EInt 1)]]
+        `shouldBe` Left (TypeMismatch TStr TInt)
+
+    it "rejeita devolve com tipo diferente do retorno declarado" $
+      checkStmts [SFun "f" [] TInt [SReturn (EBool True)]]
+        `shouldBe` Left (TypeMismatch TInt TBool)
+
+    it "aceita recursão" $
+      checkStmts
+        [ SFun "conta" [(TInt, "n")] TInt [SReturn (ECall "conta" [EVar "n"])]
+        ]
+        `shouldBe` Right ()
+
+    it "rejeita chamada antes da definição" $
+      checkStmts
+        [ SDecl TInt "x" (ECall "dobro" [EInt 1])
+        , SFun "dobro" [(TInt, "n")] TInt [SReturn (EVar "n")]
+        ]
+        `shouldBe` Left (UndefinedFun "dobro")
+
+    it "rejeita função definida duas vezes" $
+      checkStmts
+        [ SFun "f" [] TInt [SReturn (EInt 1)]
+        , SFun "f" [] TInt [SReturn (EInt 2)]
+        ]
+        `shouldBe` Left (DuplicateFun "f")
+
+    it "não deixa o corpo enxergar variável declarada fora da função" $
+      checkStmts
+        [ SDecl TInt "global" (EInt 1)
+        , SFun "f" [] TInt [SReturn (EVar "global")]
+        ]
+        `shouldBe` Left (UndefinedVar "global")
+
+    it "não vaza o parâmetro para fora da função" $
+      checkStmts
+        [ SFun "f" [(TInt, "n")] TInt [SReturn (EVar "n")]
+        , SAssign "n" (EInt 1)
+        ]
+        `shouldBe` Left (UndefinedVar "n")
+
+    it "rejeita poparrar no corpo da função fora de laço" $
+      checkStmts [SFun "f" [] TUnit [SBreak]]
+        `shouldBe` Left BreakOutsideLoop
