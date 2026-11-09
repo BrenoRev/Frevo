@@ -157,6 +157,20 @@ spec = do
         ]
         `shouldBe` Left BreakOutsideLoop
 
+    it "rejeita segue após o término de um laço anterior" $
+      checkStmts
+        [ SWhile (EBool True) [SContinue]
+        , SContinue
+        ]
+        `shouldBe` Left ContinueOutsideLoop
+
+    it "não vaza variável declarada no corpo do enquanto" $
+      checkStmts
+        [ SWhile (EBool True) [SDecl TInt "volta" (EInt 1)]
+        , SAssign "volta" (EInt 2)
+        ]
+        `shouldBe` Left (UndefinedVar "volta")
+
   describe "chamadas de comando e retorno" $ do
     it "aceita chamada de função registrada no ambiente como comando" $ do
       let env = emptyEnv { funEnv = M.singleton "avisa" ([TFloat, TFloat], TUnit) }
@@ -171,3 +185,17 @@ spec = do
       let env = emptyEnv { retType = Just (TArray TInt) }
       runTC (checkBlock [SReturn (EList [])]) env
         `shouldBe` Right ()
+
+    it "rejeita devolve com tipo diferente do retorno da função" $ do
+      let env = emptyEnv { retType = Just TInt }
+      runTC (checkBlock [SReturn (EBool True)]) env
+        `shouldBe` Left (TypeMismatch TInt TBool)
+
+    it "rejeita chamada de função não declarada como comando" $
+      checkStmts [SCall "naoExiste" []]
+        `shouldBe` Left (UndefinedFun "naoExiste")
+
+    it "rejeita chamada como comando com número errado de argumentos" $ do
+      let env = emptyEnv { funEnv = M.singleton "avisa" ([TFloat, TFloat], TUnit) }
+      runTC (checkBlock [SCall "avisa" [EFloat 10.5]]) env
+        `shouldBe` Left (ArityMismatch "avisa" 2 1)
