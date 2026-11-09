@@ -39,6 +39,16 @@ spec = do
   it "comentário não esconde erro na mesma linha" $
     erro "x = # falta o valor\n" `shouldStartWith` "t:2:1:"
 
+  it "Quebrado fora da faixa aponta o começo do número" $ do
+    erro "x = 1e400" `shouldStartWith` "t:1:5:"
+    erro "x = 1e400" `shouldContain` "fora da faixa"
+
+  it "expoente com mais de três dígitos é rejeitado, em vez de dar a volta" $ do
+    erro "x = 1e1000" `shouldStartWith` "t:1:5:"
+    erro "x = 1e0001" `shouldContain` "três dígitos"
+    erro "x = 1e18446744073709551617" `shouldStartWith` "t:1:5:"
+    erro "x = 1.5e-0001" `shouldStartWith` "t:1:5:"
+
   it "aceita arquivo vazio" $
     parseProgram "t" "" `shouldBe` Right []
 
@@ -47,7 +57,7 @@ spec = do
 
   it "aceita expressão com 100 parênteses aninhados" $
     parseProgram "t" ("x = " <> T.replicate 100 "(" <> "1" <> T.replicate 100 ")")
-      `shouldBe` Right [SAssign "x" (EInt 1)]
+      `shouldBe` Right [SAt (1, 1) (SAssign "x" (EInt 1))]
 
   it "aceita 100 blocos aninhados" $
     fmap length (parseProgram "t" (T.replicate 100 "se Certo então " <> T.replicate 100 "cabousse "))

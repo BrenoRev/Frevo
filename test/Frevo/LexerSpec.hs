@@ -33,7 +33,7 @@ spec = do
     ident "2pac" `shouldSatisfy` isLeft
 
   it "descarta espaço, quebra de linha e comentário" $
-    parseProgram "t" "# começo\n\n   # outro\nsegue # fim\n" `shouldBe` Right [SContinue]
+    parseProgram "t" "# começo\n\n   # outro\nsegue # fim\n" `shouldBe` Right [SAt (4, 1) SContinue]
 
   it "lê os literais de cada tipo básico" $ do
     expr "42" `shouldBe` Right (EInt 42)

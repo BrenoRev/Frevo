@@ -1,8 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Frevo.Parser where
 
+import Control.Monad (when)
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
+import Data.Char (isDigit)
 import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Void (Void)
 import Frevo.AST
 import Frevo.Lexer
@@ -17,8 +20,21 @@ number p = lexeme (p <* notFollowedBy identChar)
 pInteger :: Parser Expr
 pInteger = EInt <$> number L.decimal
 
+-- O try fica só no token: "1" sozinho falha aqui depois de consumir e tem de
+-- voltar para pInteger. O L.float lê o expoente como Int, que dá a volta com
+-- expoente gigante (1e18446744073709551617 virava 10.0); por isso a gramática
+-- limita o expoente a três dígitos, e com ele só o infinito sobra para recusar.
 pFloat :: Parser Expr
-pFloat = EFloat <$> number L.float
+pFloat = do
+  start <- getOffset
+  (text, x) <- try (number (match L.float))
+  let failAtStart msg = region (setErrorOffset start) (fail msg)
+  when (exponentDigits text > 3) $ failAtStart "o expoente tem no máximo três dígitos"
+  when (isInfinite x) $ failAtStart "número fora da faixa de Quebrado"
+  return (EFloat x)
+
+exponentDigits :: Text -> Int
+exponentDigits = T.length . T.filter isDigit . T.dropWhile (`notElem` ['e', 'E'])
 
 pString :: Parser Expr
 pString = EStr <$> lexeme (char '"' *> manyTill L.charLiteral (char '"'))
@@ -36,7 +52,7 @@ pCallOrVar = do
 
 pTerm :: Parser Expr
 pTerm = choice
-  [ try pFloat
+  [ pFloat
   , pInteger
   , pBool
   , pString
@@ -74,8 +90,14 @@ pType = choice
   , TArray <$> (rword "Ruma" *> rword "de" *> pType)
   ]
 
+-- A posição é lida antes do comando, então aponta a primeira palavra dele.
+located :: Parser Stmt -> Parser Stmt
+located p = do
+  pos <- getSourcePos
+  SAt (unPos (sourceLine pos), unPos (sourceColumn pos)) <$> p
+
 pStmt :: Parser Stmt
-pStmt = choice
+pStmt = located $ choice
   [ pIf
   , pWhile
   , pFor
@@ -136,4 +158,4 @@ pFun = do
   return (SFun name params ret body)
 
 parseProgram :: FilePath -> Text -> Either (ParseErrorBundle Text Void) [Stmt]
-parseProgram = runParser (sc *> many (pFun <|> pStmt) <* eof)
+parseProgram = runParser (sc *> many (located pFun <|> pStmt) <* eof)

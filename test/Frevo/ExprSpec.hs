@@ -20,6 +20,13 @@ c = EVar "c"
 
 spec :: Spec
 spec = do
+  it "aceita expoente de até três dígitos" $ do
+    expr "1e308" `shouldBe` Right (EFloat 1e308)
+    expr "2.5E-300" `shouldBe` Right (EFloat 2.5e-300)
+
+  it "inteiro maior que 64 bits não dá a volta" $
+    expr "99999999999999999999" `shouldBe` Right (EInt 99999999999999999999)
+
   it "multiplicação tem precedência sobre soma" $
     expr "1 + 2 * 3" `shouldBe` Right (EBinOp Add (EInt 1) (EBinOp Mul (EInt 2) (EInt 3)))
 
