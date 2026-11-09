@@ -23,6 +23,7 @@ library
                       Frevo.TypeEnv
                       Frevo.Infer
                       Frevo.Statement
+                      Frevo.TypeChecker
     build-depends:    parser-combinators,
                       containers,
                       mtl
@@ -45,6 +46,7 @@ test-suite spec
                       Frevo.TypeSpec
                       Frevo.InferSpec
                       Frevo.StatementSpec
+                      Frevo.TypeCheckerSpec
     build-depends:    Frevo,
                       hspec,
                       mtl,

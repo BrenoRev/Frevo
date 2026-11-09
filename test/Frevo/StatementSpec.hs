@@ -253,3 +253,7 @@ spec = do
     it "rejeita poparrar no corpo da função fora de laço" $
       checkStmts [SFun "f" [] TUnit [SBreak]]
         `shouldBe` Left BreakOutsideLoop
+
+    it "poparrar no corpo da função não sai por um laço de fora" $
+      checkStmts [SWhile (EBool True) [SFun "f" [] TUnit [SBreak]]]
+        `shouldBe` Left BreakOutsideLoop

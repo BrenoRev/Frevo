@@ -4,6 +4,7 @@ import qualified Frevo.InferSpec
 import qualified Frevo.LexerSpec
 import qualified Frevo.StatementSpec
 import qualified Frevo.StmtSpec
+import qualified Frevo.TypeCheckerSpec
 import qualified Frevo.TypeSpec
 import Test.Hspec
 
@@ -16,3 +17,4 @@ main = hspec $ do
   describe "ambiente de tipos" Frevo.TypeSpec.spec
   describe "inferência de tipos" Frevo.InferSpec.spec
   describe "checagem de comandos" Frevo.StatementSpec.spec
+  describe "checagem do programa" Frevo.TypeCheckerSpec.spec
